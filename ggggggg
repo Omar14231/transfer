@@ -1,0 +1,200 @@
+-- Dual Save & Teleport Buttons Script
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+-- أماكن التخزين للمجموعتين
+local savedPositions1 = {} -- للمجموعة الأولى
+local savedPositions2 = {} -- للمجموعة الثانية
+
+-- دالة إنشاء الأزرار
+local function createButtons()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "DualSaveTeleportGUI"
+    screenGui.ResetOnSpawn = false
+
+    -- إطار الأزرار الرئيسي
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 220, 0, 250)
+    mainFrame.Position = UDim2.new(0, 20, 0.5, -125)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.BackgroundTransparency = 0.1
+    mainFrame.Parent = screenGui
+
+    -- عنوان المجموعة 1
+    local title1 = Instance.new("TextLabel")
+    title1.Size = UDim2.new(0.9, 0, 0, 25)
+    title1.Position = UDim2.new(0.05, 0, 0.05, 0)
+    title1.Text = "📍 SET 1"
+    title1.TextColor3 = Color3.fromRGB(100, 200, 255)
+    title1.BackgroundTransparency = 1
+    title1.Font = Enum.Font.GothamBold
+    title1.TextSize = 16
+    title1.TextXAlignment = Enum.TextXAlignment.Left
+    title1.Parent = mainFrame
+
+    -- زر حفظ 1
+    local saveButton1 = Instance.new("TextButton")
+    saveButton1.Size = UDim2.new(0.9, 0, 0, 35)
+    saveButton1.Position = UDim2.new(0.05, 0, 0.2, 0)
+    saveButton1.Text = "💾 Save 1"
+    saveButton1.TextColor3 = Color3.fromRGB(255, 255, 255)
+    saveButton1.BackgroundColor3 = Color3.fromRGB(70, 130, 200)
+    saveButton1.BorderSizePixel = 0
+    saveButton1.Font = Enum.Font.GothamBold
+    saveButton1.TextSize = 14
+    saveButton1.Parent = mainFrame
+
+    -- زر انتقال 1
+    local teleportButton1 = Instance.new("TextButton")
+    teleportButton1.Size = UDim2.new(0.9, 0, 0, 35)
+    teleportButton1.Position = UDim2.new(0.05, 0, 0.35, 0)
+    teleportButton1.Text = "🚀 Teleport 1"
+    teleportButton1.TextColor3 = Color3.fromRGB(255, 255, 255)
+    teleportButton1.BackgroundColor3 = Color3.fromRGB(50, 150, 100)
+    teleportButton1.BorderSizePixel = 0
+    teleportButton1.Font = Enum.Font.GothamBold
+    teleportButton1.TextSize = 14
+    teleportButton1.Parent = mainFrame
+
+    -- عنوان المجموعة 2
+    local title2 = Instance.new("TextLabel")
+    title2.Size = UDim2.new(0.9, 0, 0, 25)
+    title2.Position = UDim2.new(0.05, 0, 0.55, 0)
+    title2.Text = "📍 SET 2"
+    title2.TextColor3 = Color3.fromRGB(255, 150, 100)
+    title2.BackgroundTransparency = 1
+    title2.Font = Enum.Font.GothamBold
+    title2.TextSize = 16
+    title2.TextXAlignment = Enum.TextXAlignment.Left
+    title2.Parent = mainFrame
+
+    -- زر حفظ 2
+    local saveButton2 = Instance.new("TextButton")
+    saveButton2.Size = UDim2.new(0.9, 0, 0, 35)
+    saveButton2.Position = UDim2.new(0.05, 0, 0.7, 0)
+    saveButton2.Text = "💾 Save 2"
+    saveButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
+    saveButton2.BackgroundColor3 = Color3.fromRGB(180, 80, 180)
+    saveButton2.BorderSizePixel = 0
+    saveButton2.Font = Enum.Font.GothamBold
+    saveButton2.TextSize = 14
+    saveButton2.Parent = mainFrame
+
+    -- زر انتقال 2
+    local teleportButton2 = Instance.new("TextButton")
+    teleportButton2.Size = UDim2.new(0.9, 0, 0, 35)
+    teleportButton2.Position = UDim2.new(0.05, 0, 0.85, 0)
+    teleportButton2.Text = "🚀 Teleport 2"
+    teleportButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
+    teleportButton2.BackgroundColor3 = Color3.fromRGB(220, 120, 60)
+    teleportButton2.BorderSizePixel = 0
+    teleportButton2.Font = Enum.Font.GothamBold
+    teleportButton2.TextSize = 14
+    teleportButton2.Parent = mainFrame
+
+    -- دالة تأثيرات الأزرار
+    local function setupButtonEffects(button, originalColor)
+        button.MouseEnter:Connect(function()
+            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = originalColor + Color3.new(0.3, 0.3, 0.3)}):Play()
+        end)
+        
+        button.MouseLeave:Connect(function()
+            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = originalColor}):Play()
+        end)
+    end
+
+    -- تطبيق التأثيرات
+    setupButtonEffects(saveButton1, Color3.fromRGB(70, 130, 200))
+    setupButtonEffects(teleportButton1, Color3.fromRGB(50, 150, 100))
+    setupButtonEffects(saveButton2, Color3.fromRGB(180, 80, 180))
+    setupButtonEffects(teleportButton2, Color3.fromRGB(220, 120, 60))
+
+    -- دالة حفظ الموقع
+    local function saveLocation(positionTable, button, setNumber)
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local hrp = character.HumanoidRootPart
+            local position = hrp.Position
+            
+            -- حفظ الموقع
+            table.insert(positionTable, position)
+            
+            -- إشعار
+            print("📍 تم حفظ الموقع في المجموعة " .. setNumber .. "! (" .. #positionTable .. " مواقع)")
+            
+            -- تأثير مرئي
+            button.Text = "✅ Saved!"
+            wait(1)
+            button.Text = "💾 Save " .. setNumber
+        else
+            print("❌ لا يمكن حفظ الموقع - الشخصية غير موجودة")
+        end
+    end
+
+    -- دالة الانتقال
+    local function teleportToLocation(positionTable, button, setNumber)
+        if #positionTable > 0 then
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local hrp = character.HumanoidRootPart
+                local lastPosition = positionTable[#positionTable] -- آخر موقع محفوظ
+                
+                -- الانتقال للموقع
+                hrp.CFrame = CFrame.new(lastPosition)
+                
+                -- إشعار
+                print("🚀 تم الانتقال إلى المجموعة " .. setNumber .. "!")
+                
+                -- تأثير مرئي
+                button.Text = "✅ Teleported!"
+                wait(1)
+                button.Text = "🚀 Teleport " .. setNumber
+            else
+                print("❌ لا يمكن الانتقال - الشخصية غير موجودة")
+            end
+        else
+            print("❌ لا توجد مواقع محفوظة في المجموعة " .. setNumber)
+            
+            -- تأثير مرئي للخطأ
+            button.Text = "❌ No Locations"
+            wait(1)
+            button.Text = "🚀 Teleport " .. setNumber
+        end
+    end
+
+    -- أحداث الأزرار
+    saveButton1.MouseButton1Click:Connect(function()
+        saveLocation(savedPositions1, saveButton1, "1")
+    end)
+
+    teleportButton1.MouseButton1Click:Connect(function()
+        teleportToLocation(savedPositions1, teleportButton1, "1")
+    end)
+
+    saveButton2.MouseButton1Click:Connect(function()
+        saveLocation(savedPositions2, saveButton2, "2")
+    end)
+
+    teleportButton2.MouseButton1Click:Connect(function()
+        teleportToLocation(savedPositions2, teleportButton2, "2")
+    end)
+
+    return screenGui
+end
+
+-- تشغيل الأزرار تلقائياً
+local function initButtons()
+    repeat wait() until player:FindFirstChild("PlayerGui")
+    
+    local buttonsGUI = createButtons()
+    buttonsGUI.Parent = player:WaitForChild("PlayerGui")
+    
+    print("🎮 أزرار الحفظ والانتقال المزدوجة جاهزة!")
+    print("💾 مجموعة 1 - أزرق")
+    print("💾 مجموعة 2 - بنفسجي")
+end
+
+-- بدء التشغيل
+initButtons()
