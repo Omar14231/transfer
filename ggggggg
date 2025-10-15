@@ -264,7 +264,7 @@ end
 -- وظيفة إرسال الرسالة
 local function sendMessage()
     local message = textBox.Text
-    if message and message ~= "" and message ~= "اكتب رسالة هنا..." then
+    if message and message ~= "" and message ~= "" then
         -- إرسال الرسالة للخادم
         chatEvent:FireServer(message)
         
