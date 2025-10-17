@@ -1,9 +1,4 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("سكريبت شات عمر اصادر v1.0", "Ocean")
-local Tab = Window:NewTab("1")
-local Section = Tab:NewSection("شات عمر")
-Section:NewButton("شات", "رح تقدر تسولف مع الى يستخدم السكريبت زي صحبك او اي احد", function()
-    print("Clicked")-- Script (يضع في ServerScriptService)
+-- Script (يضع في ServerScriptService)
 local Players = game:GetService("Players")
 local TextService = game:GetService("TextService")
 local RunService = game:GetService("RunService")
@@ -338,4 +333,3 @@ for _, player in pairs(Players:GetPlayers()) do
 end
 
 print("✅ نظام الشات العام يعمل! جميع اللاعبين يمكنهم المحادثة")
-end)
