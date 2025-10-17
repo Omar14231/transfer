@@ -21,10 +21,10 @@ function createChatGUI(player)
     screenGui.Name = "GlobalChat"
     screenGui.Parent = playerGui
     
-    -- الإطار الرئيسي
+    -- الإطار الرئيسي (مصغر للجوال)
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 400, 0, 500)
-    mainFrame.Position = UDim2.new(0, 20, 0, 100)
+    mainFrame.Size = UDim2.new(0.9, 0, 0.7, 0) -- 90% عرض, 70% ارتفاع
+    mainFrame.Position = UDim2.new(0.05, 0, 0.15, 0) -- في الأعلى
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     mainFrame.BackgroundTransparency = 0.1
     mainFrame.BorderSizePixel = 0
@@ -43,12 +43,12 @@ function createChatGUI(player)
     
     -- عنوان الشات
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, 0, 0, 40)
+    titleLabel.Size = UDim2.new(1, 0, 0, 35)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-    titleLabel.Text = "v1.0 💬 الشات العام"
+    titleLabel.Text = "💬 الشات"
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.TextSize = 18
+    titleLabel.TextSize = 16
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.Parent = mainFrame
     
@@ -59,12 +59,12 @@ function createChatGUI(player)
     
     -- زر إخفاء القائمة
     local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, -35, 0, 5)
+    closeButton.Size = UDim2.new(0, 25, 0, 25)
+    closeButton.Position = UDim2.new(1, -30, 0, 5)
     closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     closeButton.Text = "X"
     closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeButton.TextSize = 16
+    closeButton.TextSize = 14
     closeButton.Font = Enum.Font.GothamBold
     closeButton.Parent = titleLabel
     
@@ -72,73 +72,73 @@ function createChatGUI(player)
     closeCorner.CornerRadius = UDim.new(0, 6)
     closeCorner.Parent = closeButton
     
-    -- منطقة السجل
+    -- منطقة السجل (أصغر للجوال)
     local scrollFrame = Instance.new("ScrollingFrame")
-    scrollFrame.Size = UDim2.new(1, -10, 1, -150)
-    scrollFrame.Position = UDim2.new(0, 5, 0, 45)
+    scrollFrame.Size = UDim2.new(1, -10, 1, -120)
+    scrollFrame.Position = UDim2.new(0, 5, 0, 40)
     scrollFrame.BackgroundTransparency = 1
     scrollFrame.BorderSizePixel = 0
-    scrollFrame.ScrollBarThickness = 5
+    scrollFrame.ScrollBarThickness = 4
     scrollFrame.Parent = mainFrame
     
     -- قائمة الرسائل
     local messageList = Instance.new("UIListLayout")
-    messageList.Padding = UDim.new(0, 5)
+    messageList.Padding = UDim.new(0, 3)
     messageList.Parent = scrollFrame
     
     -- زر الكتابة السريعة (زر أحمر)
     local quickChatButton = Instance.new("TextButton")
-    quickChatButton.Size = UDim2.new(1, -10, 0, 35)
-    quickChatButton.Position = UDim2.new(0, 5, 1, -100)
+    quickChatButton.Size = UDim2.new(1, -10, 0, 30)
+    quickChatButton.Position = UDim2.new(0, 5, 1, -75)
     quickChatButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     quickChatButton.Text = "🔴 اكتب هنا"
     quickChatButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    quickChatButton.TextSize = 14
+    quickChatButton.TextSize = 12
     quickChatButton.Font = Enum.Font.GothamBold
     quickChatButton.Parent = mainFrame
     
     local quickChatCorner = Instance.new("UICorner")
-    quickChatCorner.CornerRadius = UDim.new(0, 8)
+    quickChatCorner.CornerRadius = UDim.new(0, 6)
     quickChatCorner.Parent = quickChatButton
     
-    -- منطقة الكتابة
+    -- منطقة الكتابة (مصغرة)
     local inputFrame = Instance.new("Frame")
-    inputFrame.Size = UDim2.new(1, -10, 0, 40)
-    inputFrame.Position = UDim2.new(0, 5, 1, -50)
+    inputFrame.Size = UDim2.new(1, -10, 0, 35)
+    inputFrame.Position = UDim2.new(0, 5, 1, -35)
     inputFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
     inputFrame.BorderSizePixel = 0
     inputFrame.Parent = mainFrame
     
     local inputCorner = Instance.new("UICorner")
-    inputCorner.CornerRadius = UDim.new(0, 8)
+    inputCorner.CornerRadius = UDim.new(0, 6)
     inputCorner.Parent = inputFrame
     
-    -- حقل النص
+    -- حقل النص (مصغر)
     local textBox = Instance.new("TextBox")
-    textBox.Size = UDim2.new(1, -80, 1, -10)
-    textBox.Position = UDim2.new(0, 5, 0, 5)
+    textBox.Size = UDim2.new(1, -60, 1, -6)
+    textBox.Position = UDim2.new(0, 5, 0, 3)
     textBox.BackgroundTransparency = 1
     textBox.Text = ""
-    textBox.PlaceholderText = "اكتب رسالتك هنا..."
+    textBox.PlaceholderText = "اكتب رسالتك..."
     textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textBox.TextSize = 14
+    textBox.TextSize = 12
     textBox.Font = Enum.Font.Gotham
     textBox.TextXAlignment = Enum.TextXAlignment.Left
     textBox.Parent = inputFrame
     
-    -- زر الإرسال
+    -- زر الإرسال (مصغر)
     local sendButton = Instance.new("TextButton")
-    sendButton.Size = UDim2.new(0, 70, 1, -10)
-    sendButton.Position = UDim2.new(1, -75, 0, 5)
+    sendButton.Size = UDim2.new(0, 50, 1, -6)
+    sendButton.Position = UDim2.new(1, -55, 0, 3)
     sendButton.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
     sendButton.Text = "إرسال"
     sendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    sendButton.TextSize = 14
+    sendButton.TextSize = 12
     sendButton.Font = Enum.Font.GothamBold
     sendButton.Parent = inputFrame
     
     local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.CornerRadius = UDim.new(0, 5)
     buttonCorner.Parent = sendButton
     
     -- حفظ البيانات
@@ -153,13 +153,12 @@ function createChatGUI(player)
         IsVisible = true
     }
     
-    -- حدث زر الإرسال
+    -- أحداث الأزرار
     sendButton.MouseButton1Click:Connect(function()
         sendMessage(player, textBox.Text)
         textBox.Text = ""
     end)
     
-    -- حدث عند ضغط انتر في حقل النص
     textBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
             sendMessage(player, textBox.Text)
@@ -167,12 +166,10 @@ function createChatGUI(player)
         end
     end)
     
-    -- حدث زر الإخفاء
     closeButton.MouseButton1Click:Connect(function()
         toggleChatVisibility(player)
     end)
     
-    -- حدث زر الكتابة السريعة
     quickChatButton.MouseButton1Click:Connect(function()
         openQuickChatPopup(player)
     end)
@@ -188,12 +185,9 @@ function toggleChatVisibility(player)
     guiData.IsVisible = not guiData.IsVisible
     guiData.MainFrame.Visible = guiData.IsVisible
     
-    -- تغيير نص زر الإخفاء عندما تكون القائمة مخفية
     if not guiData.IsVisible then
-        -- إنشاء زر صغير لإظهار الشات
         createShowChatButton(player)
     else
-        -- إزالة زر الإظهار إذا كان موجوداً
         removeShowChatButton(player)
     end
 end
@@ -203,21 +197,20 @@ function createShowChatButton(player)
     local guiData = playerGuis[player]
     if not guiData or not guiData.Gui then return end
     
-    -- إزالة الزر القديم إذا موجود
     removeShowChatButton(player)
     
     local showButton = Instance.new("TextButton")
-    showButton.Size = UDim2.new(0, 50, 0, 50)
-    showButton.Position = UDim2.new(0, 20, 0, 100)
+    showButton.Size = UDim2.new(0, 60, 0, 60)
+    showButton.Position = UDim2.new(0, 20, 0, 50)
     showButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
     showButton.Text = "💬"
     showButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    showButton.TextSize = 20
+    showButton.TextSize = 24
     showButton.Font = Enum.Font.GothamBold
     showButton.Parent = guiData.Gui
     
     local showCorner = Instance.new("UICorner")
-    showCorner.CornerRadius = UDim.new(0, 10)
+    showCorner.CornerRadius = UDim.new(0, 12)
     showCorner.Parent = showButton
     
     showButton.MouseButton1Click:Connect(function()
@@ -236,15 +229,15 @@ function removeShowChatButton(player)
     end
 end
 
--- وظيفة فتح نافذة الكتابة السريعة
+-- وظيفة فتح نافذة الكتابة السريعة (مصغرة للجوال)
 function openQuickChatPopup(player)
     local guiData = playerGuis[player]
     if not guiData then return end
     
-    -- نافذة الكتابة السريعة
+    -- نافذة الكتابة السريعة (مصغرة)
     local popupFrame = Instance.new("Frame")
-    popupFrame.Size = UDim2.new(0, 300, 0, 150)
-    popupFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+    popupFrame.Size = UDim2.new(0.8, 0, 0, 120)
+    popupFrame.Position = UDim2.new(0.1, 0, 0.3, 0)
     popupFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
     popupFrame.BorderSizePixel = 0
     popupFrame.Parent = guiData.Gui
@@ -260,11 +253,11 @@ function openQuickChatPopup(player)
     
     -- عنوان النافذة
     local popupTitle = Instance.new("TextLabel")
-    popupTitle.Size = UDim2.new(1, 0, 0, 40)
+    popupTitle.Size = UDim2.new(1, 0, 0, 30)
     popupTitle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    popupTitle.Text = "🔴 اكتب رسالتك هنا"
+    popupTitle.Text = "🔴 اكتب رسالتك"
     popupTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    popupTitle.TextSize = 16
+    popupTitle.TextSize = 14
     popupTitle.Font = Enum.Font.GothamBold
     popupTitle.Parent = popupFrame
     
@@ -274,29 +267,29 @@ function openQuickChatPopup(player)
     
     -- حقل النص السريع
     local quickTextBox = Instance.new("TextBox")
-    quickTextBox.Size = UDim2.new(1, -20, 0, 50)
-    quickTextBox.Position = UDim2.new(0, 10, 0, 50)
+    quickTextBox.Size = UDim2.new(1, -10, 0, 40)
+    quickTextBox.Position = UDim2.new(0, 5, 0, 35)
     quickTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
     quickTextBox.Text = ""
     quickTextBox.PlaceholderText = "اكتب أي شيء هنا..."
     quickTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    quickTextBox.TextSize = 14
+    quickTextBox.TextSize = 12
     quickTextBox.Font = Enum.Font.Gotham
     quickTextBox.TextWrapped = true
     quickTextBox.Parent = popupFrame
     
     local textCorner = Instance.new("UICorner")
-    textCorner.CornerRadius = UDim.new(0, 8)
+    textCorner.CornerRadius = UDim.new(0, 6)
     textCorner.Parent = quickTextBox
     
     -- زر الإرسال السريع
     local quickSendButton = Instance.new("TextButton")
-    quickSendButton.Size = UDim2.new(0, 100, 0, 30)
-    quickSendButton.Position = UDim2.new(0.5, -50, 1, -40)
+    quickSendButton.Size = UDim2.new(0, 80, 0, 25)
+    quickSendButton.Position = UDim2.new(0.5, -40, 1, -30)
     quickSendButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    quickSendButton.Text = "إرسال سريع"
+    quickSendButton.Text = "إرسال"
     quickSendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    quickSendButton.TextSize = 14
+    quickSendButton.TextSize = 12
     quickSendButton.Font = Enum.Font.GothamBold
     quickSendButton.Parent = popupFrame
     
@@ -304,31 +297,12 @@ function openQuickChatPopup(player)
     quickCorner.CornerRadius = UDim.new(0, 6)
     quickCorner.Parent = quickSendButton
     
-    -- زر الإغلاق
-    local closePopupButton = Instance.new("TextButton")
-    closePopupButton.Size = UDim2.new(0, 80, 0, 25)
-    closePopupButton.Position = UDim2.new(0.5, -40, 1, -10)
-    closePopupButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-    closePopupButton.Text = "إغلاق"
-    closePopupButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closePopupButton.TextSize = 12
-    closePopupButton.Font = Enum.Font.Gotham
-    closePopupButton.Parent = popupFrame
-    
-    local closePopupCorner = Instance.new("UICorner")
-    closePopupCorner.CornerRadius = UDim.new(0, 6)
-    closePopupCorner.Parent = closePopupButton
-    
     -- أحداث الأزرار
     quickSendButton.MouseButton1Click:Connect(function()
         if string.len(quickTextBox.Text) > 0 then
             sendMessage(player, quickTextBox.Text)
             popupFrame:Destroy()
         end
-    end)
-    
-    closePopupButton.MouseButton1Click:Connect(function()
-        popupFrame:Destroy()
     end)
     
     quickTextBox.FocusLost:Connect(function(enterPressed)
@@ -390,7 +364,7 @@ function showMessageAboveHead(player, message)
     -- إنشاء BillboardGui للرسالة
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChatMessage"
-    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.Size = UDim2.new(0, 200, 0, 40)
     billboard.StudsOffset = Vector3.new(0, 2, 0)
     billboard.AlwaysOnTop = true
     billboard.Parent = head
@@ -403,17 +377,17 @@ function showMessageAboveHead(player, message)
     messageFrame.Parent = billboard
     
     local frameCorner = Instance.new("UICorner")
-    frameCorner.CornerRadius = UDim.new(0, 8)
+    frameCorner.CornerRadius = UDim.new(0, 6)
     frameCorner.Parent = messageFrame
     
     -- نص الرسالة
     local messageLabel = Instance.new("TextLabel")
-    messageLabel.Size = UDim2.new(1, -10, 1, -10)
-    messageLabel.Position = UDim2.new(0, 5, 0, 5)
+    messageLabel.Size = UDim2.new(1, -8, 1, -8)
+    messageLabel.Position = UDim2.new(0, 4, 0, 4)
     messageLabel.BackgroundTransparency = 1
     messageLabel.Text = player.Name .. ": " .. message
     messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    messageLabel.TextSize = 12
+    messageLabel.TextSize = 10
     messageLabel.Font = Enum.Font.Gotham
     messageLabel.TextWrapped = true
     messageLabel.Parent = messageFrame
@@ -443,8 +417,8 @@ function updateChatGUI(player)
     local scrollFrame = guiData.ScrollFrame
     scrollFrame:ClearAllChildren()
     
-    -- عرض آخر 20 رسالة
-    local startIndex = math.max(1, #chatMessages - 19)
+    -- عرض آخر 15 رسالة (أقل للجوال)
+    local startIndex = math.max(1, #chatMessages - 14)
     
     for i = startIndex, #chatMessages do
         local messageData = chatMessages[i]
@@ -458,7 +432,7 @@ function updateChatGUI(player)
     scrollFrame.CanvasPosition = Vector2.new(0, scrollFrame.CanvasSize.Y.Offset)
 end
 
--- وظيفة إنشاء تسمية للرسالة
+-- وظيفة إنشاء تسمية للرسالة (مصغرة للجوال)
 function createMessageLabel(parent, player, message, timestamp)
     local messageFrame = Instance.new("Frame")
     messageFrame.Size = UDim2.new(1, 0, 0, 0)
@@ -471,11 +445,11 @@ function createMessageLabel(parent, player, message, timestamp)
     
     -- اسم اللاعب
     local playerLabel = Instance.new("TextLabel")
-    playerLabel.Size = UDim2.new(1, 0, 0, 20)
+    playerLabel.Size = UDim2.new(1, 0, 0, 16)
     playerLabel.BackgroundTransparency = 1
     playerLabel.Text = player.Name
     playerLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-    playerLabel.TextSize = 12
+    playerLabel.TextSize = 10
     playerLabel.Font = Enum.Font.GothamBold
     playerLabel.TextXAlignment = Enum.TextXAlignment.Left
     playerLabel.Parent = messageFrame
@@ -486,7 +460,7 @@ function createMessageLabel(parent, player, message, timestamp)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = message
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textLabel.TextSize = 14
+    textLabel.TextSize = 11
     textLabel.Font = Enum.Font.Gotham
     textLabel.TextWrapped = true
     textLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -495,11 +469,11 @@ function createMessageLabel(parent, player, message, timestamp)
     
     -- الوقت
     local timeLabel = Instance.new("TextLabel")
-    timeLabel.Size = UDim2.new(1, 0, 0, 15)
+    timeLabel.Size = UDim2.new(1, 0, 0, 12)
     timeLabel.BackgroundTransparency = 1
     timeLabel.Text = os.date("%H:%M", timestamp)
     timeLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-    timeLabel.TextSize = 10
+    timeLabel.TextSize = 8
     timeLabel.Font = Enum.Font.Gotham
     timeLabel.TextXAlignment = Enum.TextXAlignment.Left
     timeLabel.Parent = messageFrame
@@ -538,4 +512,4 @@ for _, player in pairs(Players:GetPlayers()) do
     onPlayerAdded(player)
 end
 
-print("✅ نظام الشات العام يعمل! جميع اللاعبين يمكنهم المحادثة")
+print("✅ نظام الشات للجوال يعمل! جميع اللاعبين يمكنهم المحادثة")
