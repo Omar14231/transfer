@@ -10,7 +10,6 @@ local MAX_MESSAGE_LENGTH = 100 -- أقصى طول للرسالة
 -- تخزين الرسائل والواجهات
 local playerGuis = {}
 local chatMessages = {}
-local messageQueue = {}
 
 -- وظيفة إنشاء واجهة الشات للاعب
 function createChatGUI(player)
@@ -325,7 +324,7 @@ function sendMessage(sender, message)
     -- تنظيف النص من الرموز الخطيرة
     message = string.gsub(message, "[<>]", "")
     
-    -- إضافة الرسالة للطلاب
+    -- إضافة الرسالة للطلاب (الرسالة الجديدة في النهاية)
     table.insert(chatMessages, {
         Player = sender,
         Message = message,
@@ -417,23 +416,21 @@ function updateChatGUI(player)
     local scrollFrame = guiData.ScrollFrame
     scrollFrame:ClearAllChildren()
     
-    -- عرض آخر 15 رسالة (أقل للجوال)
-    local startIndex = math.max(1, #chatMessages - 14)
-    
-    for i = startIndex, #chatMessages do
+    -- عرض الرسائل من الأقدم إلى الأحدث (القديم في الأعلى، الجديد في الأسفل)
+    for i = 1, #chatMessages do
         local messageData = chatMessages[i]
         if messageData then
-            createMessageLabel(scrollFrame, messageData.Player, messageData.Message, messageData.Timestamp)
+            createMessageLabel(scrollFrame, messageData.Player, messageData.Message, messageData.Timestamp, i)
         end
     end
     
-    -- التمرير للأسفل
+    -- التمرير للأسفل لرؤية أحدث الرسائل
     scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollFrame.UIListLayout.AbsoluteContentSize.Y)
     scrollFrame.CanvasPosition = Vector2.new(0, scrollFrame.CanvasSize.Y.Offset)
 end
 
 -- وظيفة إنشاء تسمية للرسالة (مصغرة للجوال)
-function createMessageLabel(parent, player, message, timestamp)
+function createMessageLabel(parent, player, message, timestamp, index)
     local messageFrame = Instance.new("Frame")
     messageFrame.Size = UDim2.new(1, 0, 0, 0)
     messageFrame.BackgroundTransparency = 1
