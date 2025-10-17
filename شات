@@ -1,338 +1,341 @@
--- خدمات روبلكس
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("سكريبت شات عمر اصادر v1.0", "Ocean")
+local Tab = Window:NewTab("1")
+local Section = Tab:NewSection("شات عمر")
+Section:NewButton("شات", "رح تقدر تسولف مع الى يستخدم السكريبت زي صحبك او اي احد", function()
+    print("Clicked")-- Script (يضع في ServerScriptService)
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextService = game:GetService("TextService")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
--- اللاعب المحلي
-local localPlayer = Players.LocalPlayer
-local playerGui = localPlayer:WaitForChild("PlayerGui")
+-- إعدادات الشات
+local CHAT_DURATION = 15 -- مدة ظهور الرسالة فوق الرأس (ثانية)
+local MAX_MESSAGE_LENGTH = 100 -- أقصى طول للرسالة
 
--- إنشاء واجهة المستخدم
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "ChatInterface"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
+-- تخزين الرسائل والواجهات
+local playerGuis = {}
+local chatMessages = {}
+local messageQueue = {}
 
--- إناء الخلفية الرئيسي
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 300, 0, 400)
-mainFrame.Position = UDim2.new(0, 20, 0.5, -200)
-mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-mainFrame.BorderSizePixel = 0
-mainFrame.ClipsDescendants = true
-mainFrame.Visible = false
-mainFrame.Parent = screenGui
+-- وظيفة إنشاء واجهة الشات للاعب
+function createChatGUI(player)
+    local playerGui = player:WaitForChild("PlayerGui")
+    
+    -- إنشاء ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "GlobalChat"
+    screenGui.Parent = playerGui
+    
+    -- الإطار الرئيسي
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 400, 0, 500)
+    mainFrame.Position = UDim2.new(0, 20, 0, 100)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    mainFrame.BackgroundTransparency = 0.1
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+    
+    -- زوايا مستديرة
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = mainFrame
+    
+    -- ظل
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(100, 100, 200)
+    stroke.Thickness = 2
+    stroke.Parent = mainFrame
+    
+    -- عنوان الشات
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0, 40)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+    titleLabel.Text = "💬 الشات العام"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextSize = 18
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Parent = mainFrame
+    
+    -- زوايا العنوان
+    local titleCorner = Instance.new("UICorner")
+    titleCorner.CornerRadius = UDim.new(0, 10)
+    titleCorner.Parent = titleLabel
+    
+    -- منطقة السجل
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Size = UDim2.new(1, -10, 1, -100)
+    scrollFrame.Position = UDim2.new(0, 5, 0, 45)
+    scrollFrame.BackgroundTransparency = 1
+    scrollFrame.BorderSizePixel = 0
+    scrollFrame.ScrollBarThickness = 5
+    scrollFrame.Parent = mainFrame
+    
+    -- قائمة الرسائل
+    local messageList = Instance.new("UIListLayout")
+    messageList.Padding = UDim.new(0, 5)
+    messageList.Parent = scrollFrame
+    
+    -- منطقة الكتابة
+    local inputFrame = Instance.new("Frame")
+    inputFrame.Size = UDim2.new(1, -10, 0, 40)
+    inputFrame.Position = UDim2.new(0, 5, 1, -50)
+    inputFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    inputFrame.BorderSizePixel = 0
+    inputFrame.Parent = mainFrame
+    
+    local inputCorner = Instance.new("UICorner")
+    inputCorner.CornerRadius = UDim.new(0, 8)
+    inputCorner.Parent = inputFrame
+    
+    -- حقل النص
+    local textBox = Instance.new("TextBox")
+    textBox.Size = UDim2.new(1, -80, 1, -10)
+    textBox.Position = UDim2.new(0, 5, 0, 5)
+    textBox.BackgroundTransparency = 1
+    textBox.Text = ""
+    textBox.PlaceholderText = "اكتب رسالتك هنا..."
+    textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textBox.TextSize = 14
+    textBox.Font = Enum.Font.Gotham
+    textBox.TextXAlignment = Enum.TextXAlignment.Left
+    textBox.Parent = inputFrame
+    
+    -- زر الإرسال
+    local sendButton = Instance.new("TextButton")
+    sendButton.Size = UDim2.new(0, 70, 1, -10)
+    sendButton.Position = UDim2.new(1, -75, 0, 5)
+    sendButton.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+    sendButton.Text = "إرسال"
+    sendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    sendButton.TextSize = 14
+    sendButton.Font = Enum.Font.GothamBold
+    sendButton.Parent = inputFrame
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.Parent = sendButton
+    
+    -- حفظ البيانات
+    playerGuis[player] = {
+        Gui = screenGui,
+        ScrollFrame = scrollFrame,
+        TextBox = textBox,
+        SendButton = sendButton
+    }
+    
+    -- حدث زر الإرسال
+    sendButton.MouseButton1Click:Connect(function()
+        sendMessage(player, textBox.Text)
+        textBox.Text = ""
+    end)
+    
+    -- حدث عند ضغط انتر في حقل النص
+    textBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            sendMessage(player, textBox.Text)
+            textBox.Text = ""
+        end
+    end)
+    
+    return playerGuis[player]
+end
 
--- زوايا مستديرة
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 8)
-uiCorner.Parent = mainFrame
-
--- ظل
-local uiShadow = Instance.new("UIStroke")
-uiShadow.Color = Color3.fromRGB(20, 20, 20)
-uiShadow.Thickness = 2
-uiShadow.Parent = mainFrame
-
--- شريط العنوان
-local titleBar = Instance.new("Frame")
-titleBar.Name = "TitleBar"
-titleBar.Size = UDim2.new(1, 0, 0, 40)
-titleBar.Position = UDim2.new(0, 0, 0, 0)
-titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-titleBar.BorderSizePixel = 0
-titleBar.Parent = mainFrame
-
--- زوايا مستديرة للشريط العلوي فقط
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 8)
-titleCorner.Parent = titleBar
-
--- نص العنوان
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = "TitleLabel"
-titleLabel.Size = UDim2.new(1, -10, 1, 0)
-titleLabel.Position = UDim2.new(0, 10, 0, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "الدردشة"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextScaled = true
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextXAlignment = Enum.TextXAlignment.Right
-titleLabel.Parent = titleBar
-
--- منطقة الرسائل
-local messagesFrame = Instance.new("ScrollingFrame")
-messagesFrame.Name = "MessagesFrame"
-messagesFrame.Size = UDim2.new(1, -10, 1, -100)
-messagesFrame.Position = UDim2.new(0, 5, 0, 45)
-messagesFrame.BackgroundTransparency = 1
-messagesFrame.BorderSizePixel = 0
-messagesFrame.ScrollBarThickness = 4
-messagesFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
-messagesFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-messagesFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-messagesFrame.Parent = mainFrame
-
--- قائمة الرسائل
-local messagesLayout = Instance.new("UIListLayout")
-messagesLayout.Name = "MessagesLayout"
-messagesLayout.Padding = UDim.new(0, 5)
-messagesLayout.SortOrder = Enum.SortOrder.LayoutOrder
-messagesLayout.Parent = messagesFrame
-
--- منطقة الإدخال
-local inputFrame = Instance.new("Frame")
-inputFrame.Name = "InputFrame"
-inputFrame.Size = UDim2.new(1, -10, 0, 40)
-inputFrame.Position = UDim2.new(0, 5, 1, -50)
-inputFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-inputFrame.BorderSizePixel = 0
-inputFrame.Parent = mainFrame
-
--- زوايا مستديرة لمنطقة الإدخال
-local inputCorner = Instance.new("UICorner")
-inputCorner.CornerRadius = UDim.new(0, 6)
-inputCorner.Parent = inputFrame
-
--- حقل النص
-local textBox = Instance.new("TextBox")
-textBox.Name = "ChatTextBox"
-textBox.Size = UDim2.new(1, -10, 1, -10)
-textBox.Position = UDim2.new(0, 5, 0, 5)
-textBox.BackgroundTransparency = 1
-textBox.Text = "اكتب رسالة هنا..."
-textBox.TextColor3 = Color3.fromRGB(200, 200, 200)
-textBox.TextScaled = true
-textBox.Font = Enum.Font.Gotham
-textBox.TextXAlignment = Enum.TextXAlignment.Right
-textBox.ClearTextOnFocus = false
-textBox.Parent = inputFrame
-
--- زر الإرسال
-local sendButton = Instance.new("TextButton")
-sendButton.Name = "SendButton"
-sendButton.Size = UDim2.new(0, 60, 0, 30)
-sendButton.Position = UDim2.new(1, -65, 0.5, -15)
-sendButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-sendButton.BorderSizePixel = 0
-sendButton.Text = "إرسال"
-sendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-sendButton.TextScaled = true
-sendButton.Font = Enum.Font.GothamBold
-sendButton.Parent = inputFrame
-
--- زوايا مستديرة لزر الإرسال
-local sendCorner = Instance.new("UICorner")
-sendCorner.CornerRadius = UDim.new(0, 6)
-sendCorner.Parent = sendButton
-
--- زر فتح/إغلاق الدردشة
-local toggleButton = Instance.new("ImageButton")
-toggleButton.Name = "ToggleButton"
-toggleButton.Size = UDim2.new(0, 50, 0, 50)
-toggleButton.Position = UDim2.new(0, 20, 0, 20)
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-toggleButton.BorderSizePixel = 0
-toggleButton.Image = "rbxassetid://14184355227" -- استبدل بمعرف الصورة الخاص بك
-toggleButton.Parent = screenGui
-
--- زوايا مستديرة للزر
-local toggleCorner = Instance.new("UICorner")
-toggleCorner.CornerRadius = UDim.new(0, 25)
-toggleCorner.Parent = toggleButton
-
--- ظل للزر
-local toggleShadow = Instance.new("UIStroke")
-toggleShadow.Color = Color3.fromRGB(20, 20, 20)
-toggleShadow.Thickness = 2
-toggleShadow.Parent = toggleButton
-
--- إنشاء RemoteEvents للاتصال بين اللاعبين
-local chatEvent
-if RunService:IsClient() then
-    if ReplicatedStorage:FindFirstChild("ChatEvent") then
-        chatEvent = ReplicatedStorage:FindFirstChild("ChatEvent")
-    else
-        chatEvent = Instance.new("RemoteEvent")
-        chatEvent.Name = "ChatEvent"
-        chatEvent.Parent = ReplicatedStorage
+-- وظيفة إرسال رسالة
+function sendMessage(sender, message)
+    if string.len(message) == 0 or string.len(message) > MAX_MESSAGE_LENGTH then
+        return
+    end
+    
+    -- تنظيف النص من الرموز الخطيرة
+    message = string.gsub(message, "[<>]", "")
+    
+    -- إضافة الرسالة للطلاب
+    table.insert(chatMessages, {
+        Player = sender,
+        Message = message,
+        Timestamp = os.time()
+    })
+    
+    -- عرض الرسالة فوق رأس المرسل
+    showMessageAboveHead(sender, message)
+    
+    -- تحديث واجهات جميع اللاعبين
+    updateAllChatGuis()
+    
+    -- بث الرسالة لجميع اللاعبين
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= sender then
+            showMessageAboveHead(sender, message)
+        end
     end
 end
 
--- متغيرات
-local chatOpen = false
-local messageDuration = 15 -- مدة عرض الرسالة فوق رأس اللاعب
-local activeMessageBillboards = {}
-
--- وظيفة إنشاء رسالة في القائمة
-local function createMessageInChat(sender, message)
-    local messageFrame = Instance.new("Frame")
-    messageFrame.Name = "MessageFrame"
-    messageFrame.Size = UDim2.new(1, 0, 0, 40)
-    messageFrame.BackgroundTransparency = 1
-    messageFrame.Parent = messagesFrame
+-- وظيفة عرض الرسالة فوق الرأس
+function showMessageAboveHead(player, message)
+    local character = player.Character
+    if not character then return end
     
-    local senderLabel = Instance.new("TextLabel")
-    senderLabel.Name = "SenderLabel"
-    senderLabel.Size = UDim2.new(0.3, 0, 0.5, 0)
-    senderLabel.Position = UDim2.new(0.7, 0, 0, 0)
-    senderLabel.BackgroundTransparency = 1
-    senderLabel.Text = sender .. ":"
-    senderLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
-    senderLabel.TextScaled = true
-    senderLabel.Font = Enum.Font.GothamBold
-    senderLabel.TextXAlignment = Enum.TextXAlignment.Right
-    senderLabel.Parent = messageFrame
+    local head = character:FindFirstChild("Head")
+    if not head then return end
     
-    local messageLabel = Instance.new("TextLabel")
-    messageLabel.Name = "MessageLabel"
-    messageLabel.Size = UDim2.new(0.65, 0, 1, 0)
-    messageLabel.Position = UDim2.new(0, 5, 0, 0)
-    messageLabel.BackgroundTransparency = 1
-    messageLabel.Text = message
-    messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    messageLabel.TextScaled = true
-    messageLabel.Font = Enum.Font.Gotham
-    messageLabel.TextXAlignment = Enum.TextXAlignment.Right
-    messageLabel.TextWrapped = true
-    messageLabel.Parent = messageFrame
-    
-    -- التمرير إلى الأسفل لرؤية أحدث الرسائل
-    messagesFrame.CanvasPosition = Vector2.new(0, messagesFrame.AbsoluteCanvasSize.Y)
-end
-
--- وظيفة عرض الرسالة فوق رأس اللاعب
-local function showMessageAboveHead(player, message)
-    -- إزالة الرسالة السابقة إن وجدت
-    if activeMessageBillboards[player] then
-        activeMessageBillboards[player]:Destroy()
-        activeMessageBillboards[player] = nil
+    -- إزالة الرسائل القديمة
+    for _, obj in pairs(head:GetChildren()) do
+        if obj.Name == "ChatMessage" then
+            obj:Destroy()
+        end
     end
     
-    -- إنشاء BillboardGui لعرض الرسالة فوق رأس اللاعب
+    -- إنشاء BillboardGui للرسالة
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChatMessage"
     billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
     billboard.AlwaysOnTop = true
-    billboard.Adornee = player.Character and player.Character:FindFirstChild("Head")
-    billboard.Parent = player.Character and player.Character:FindFirstChild("Head")
+    billboard.Parent = head
     
-    -- إناء للرسالة
+    -- إطار الرسالة
     local messageFrame = Instance.new("Frame")
-    messageFrame.Name = "MessageFrame"
     messageFrame.Size = UDim2.new(1, 0, 1, 0)
-    messageFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    messageFrame.BackgroundTransparency = 0.2
-    messageFrame.BorderSizePixel = 0
+    messageFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    messageFrame.BackgroundTransparency = 0.3
     messageFrame.Parent = billboard
     
-    -- زوايا مستديرة
-    local messageCorner = Instance.new("UICorner")
-    messageCorner.CornerRadius = UDim.new(0, 8)
-    messageCorner.Parent = messageFrame
+    local frameCorner = Instance.new("UICorner")
+    frameCorner.CornerRadius = UDim.new(0, 8)
+    frameCorner.Parent = messageFrame
     
     -- نص الرسالة
     local messageLabel = Instance.new("TextLabel")
-    messageLabel.Name = "MessageLabel"
     messageLabel.Size = UDim2.new(1, -10, 1, -10)
     messageLabel.Position = UDim2.new(0, 5, 0, 5)
     messageLabel.BackgroundTransparency = 1
-    messageLabel.Text = message
+    messageLabel.Text = player.Name .. ": " .. message
     messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    messageLabel.TextScaled = true
+    messageLabel.TextSize = 12
     messageLabel.Font = Enum.Font.Gotham
     messageLabel.TextWrapped = true
     messageLabel.Parent = messageFrame
     
-    -- حفظ المرجع لإزالته لاحقًا
-    activeMessageBillboards[player] = billboard
-    
     -- إزالة الرسالة بعد المدة المحددة
-    delay(messageDuration, function()
+    delay(CHAT_DURATION, function()
         if billboard and billboard.Parent then
             billboard:Destroy()
-            activeMessageBillboards[player] = nil
         end
     end)
 end
 
--- وظيفة إرسال الرسالة
-local function sendMessage()
-    local message = textBox.Text
-    if message and message ~= "" and message ~= "" then
-        -- إرسال الرسالة للخادم
-        chatEvent:FireServer(message)
-        
-        -- عرض الرسالة في واجهة المستخدم المحلية
-        createMessageInChat(localPlayer.Name, message)
-        showMessageAboveHead(localPlayer, message)
-        
-        -- مسح حقل النص
-        textBox.Text = ""
-    end
-end
-
--- وظيفة فتح/إغلاق الدردشة
-local function toggleChat()
-    chatOpen = not chatOpen
-    mainFrame.Visible = chatOpen
-    
-    if chatOpen then
-        -- تأثير عند الفتح
-        mainFrame.Size = UDim2.new(0, 0, 0, 0)
-        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-        local tween = TweenService:Create(mainFrame, tweenInfo, {Size = UDim2.new(0, 300, 0, 400)})
-        tween:Play()
-        
-        -- التركيز على حقل النص
-        textBox:CaptureFocus()
-    else
-        -- تأثير عند الإغلاق
-        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-        local tween = TweenService:Create(mainFrame, tweenInfo, {Size = UDim2.new(0, 0, 0, 0)})
-        tween:Play()
-    end
-end
-
--- استقبال الرسائل من اللاعبين الآخرين
-chatEvent.OnClientEvent:Connect(function(sender, message)
-    if sender ~= localPlayer then
-        createMessageInChat(sender.Name, message)
-        
-        -- عرض الرسالة فوق رأس اللاعب المرسل
-        if sender.Character then
-            showMessageAboveHead(sender, message)
+-- وظيفة تحديث واجهات الشات للجميع
+function updateAllChatGuis()
+    for player, guiData in pairs(playerGuis) do
+        if player and player.Parent then
+            updateChatGUI(player)
         end
     end
-end)
+end
 
--- أحداث النقر
-toggleButton.MouseButton1Click:Connect(toggleChat)
-sendButton.MouseButton1Click:Connect(sendMessage)
-
--- حدث عند الضغط على Enter في حقل النص
-textBox.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        sendMessage()
+-- وظيفة تحديث واجهة الشات للاعب
+function updateChatGUI(player)
+    local guiData = playerGuis[player]
+    if not guiData then return end
+    
+    local scrollFrame = guiData.ScrollFrame
+    scrollFrame:ClearAllChildren()
+    
+    -- عرض آخر 20 رسالة
+    local startIndex = math.max(1, #chatMessages - 19)
+    
+    for i = startIndex, #chatMessages do
+        local messageData = chatMessages[i]
+        if messageData then
+            createMessageLabel(scrollFrame, messageData.Player, messageData.Message, messageData.Timestamp)
+        end
     end
-end)
+    
+    -- التمرير للأسفل
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollFrame.UIListLayout.AbsoluteContentSize.Y)
+    scrollFrame.CanvasPosition = Vector2.new(0, scrollFrame.CanvasSize.Y.Offset)
+end
 
--- تكييف الواجهة مع مختلف الأجهزة
-local function adaptToDevice()
-    if UserInputService.TouchEnabled then
-        -- تكبير العناصر للأجهزة اللوحية والهواتف
-        toggleButton.Size = UDim2.new(0, 70, 0, 70)
-        mainFrame.Size = UDim2.new(0, 350, 0, 450)
-        textBox.TextSize = 18
+-- وظيفة إنشاء تسمية للرسالة
+function createMessageLabel(parent, player, message, timestamp)
+    local messageFrame = Instance.new("Frame")
+    messageFrame.Size = UDim2.new(1, 0, 0, 0)
+    messageFrame.BackgroundTransparency = 1
+    messageFrame.AutomaticSize = Enum.AutomaticSize.Y
+    messageFrame.Parent = parent
+    
+    local messageLayout = Instance.new("UIListLayout")
+    messageLayout.Parent = messageFrame
+    
+    -- اسم اللاعب
+    local playerLabel = Instance.new("TextLabel")
+    playerLabel.Size = UDim2.new(1, 0, 0, 20)
+    playerLabel.BackgroundTransparency = 1
+    playerLabel.Text = player.Name
+    playerLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+    playerLabel.TextSize = 12
+    playerLabel.Font = Enum.Font.GothamBold
+    playerLabel.TextXAlignment = Enum.TextXAlignment.Left
+    playerLabel.Parent = messageFrame
+    
+    -- نص الرسالة
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 0, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = message
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.TextSize = 14
+    textLabel.Font = Enum.Font.Gotham
+    textLabel.TextWrapped = true
+    textLabel.TextXAlignment = Enum.TextXAlignment.Left
+    textLabel.AutomaticSize = Enum.AutomaticSize.Y
+    textLabel.Parent = messageFrame
+    
+    -- الوقت
+    local timeLabel = Instance.new("TextLabel")
+    timeLabel.Size = UDim2.new(1, 0, 0, 15)
+    timeLabel.BackgroundTransparency = 1
+    timeLabel.Text = os.date("%H:%M", timestamp)
+    timeLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+    timeLabel.TextSize = 10
+    timeLabel.Font = Enum.Font.Gotham
+    timeLabel.TextXAlignment = Enum.TextXAlignment.Left
+    timeLabel.Parent = messageFrame
+end
+
+-- عند دخول لاعب جديد
+function onPlayerAdded(player)
+    -- الانتظار حتى تحميل الشخصية
+    player.CharacterAdded:Connect(function(character)
+        wait(1)
+        createChatGUI(player)
+        updateChatGUI(player)
+    end)
+    
+    -- إذا كانت الشخصية موجودة مسبقاً
+    if player.Character then
+        createChatGUI(player)
+        updateChatGUI(player)
     end
 end
 
--- تكييف الواجهة عند البدء
-adaptToDevice()
+-- عند مغادرة لاعب
+function onPlayerRemoving(player)
+    if playerGuis[player] then
+        playerGuis[player].Gui:Destroy()
+        playerGuis[player] = nil
+    end
+end
 
-print("تم تحميل واجهة الدردشة بنجاح!")
+-- الاستماع للأحداث
+Players.PlayerAdded:Connect(onPlayerAdded)
+Players.PlayerRemoving:Connect(onPlayerRemoving)
+
+-- تهيئة اللاعبين الموجودين
+for _, player in pairs(Players:GetPlayers()) do
+    onPlayerAdded(player)
+end
+
+print("✅ نظام الشات العام يعمل! جميع اللاعبين يمكنهم المحادثة")
+end)
