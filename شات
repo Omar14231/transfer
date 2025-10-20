@@ -45,7 +45,7 @@ function createChatGUI(player)
     titleLabel.Size = UDim2.new(1, 0, 0, 35)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-    titleLabel.Text = "💬 الشات"
+    titleLabel.Text = "💬 الشات v1.0"
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLabel.TextSize = 16
     titleLabel.Font = Enum.Font.GothamBold
