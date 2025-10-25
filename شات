@@ -73,18 +73,20 @@ function createChatGUI(player)
     closeCorner.CornerRadius = UDim.new(0, 6)
     closeCorner.Parent = closeButton
     
-    -- منطقة السجل (أصغر للجوال)
+    -- منطقة السجل (أصغر للجوال) - مع إمكانية السحب
     local scrollFrame = Instance.new("ScrollingFrame")
     scrollFrame.Size = UDim2.new(1, -10, 1, -120)
     scrollFrame.Position = UDim2.new(0, 5, 0, 40)
     scrollFrame.BackgroundTransparency = 1
     scrollFrame.BorderSizePixel = 0
-    scrollFrame.ScrollBarThickness = 4
+    scrollFrame.ScrollBarThickness = 6 -- أسمك
+    scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 200)
+    scrollFrame.VerticalScrollBarInset = Enum.ScrollBarInset.Always
     scrollFrame.Parent = mainFrame
     
     -- قائمة الرسائل
     local messageList = Instance.new("UIListLayout")
-    messageList.Padding = UDim.new(0, 3)
+    messageList.Padding = UDim.new(0, 5) -- مسافة أكبر بين الرسائل
     messageList.Parent = scrollFrame
     
     -- منطقة الكتابة (مصغرة)
@@ -220,6 +222,13 @@ function toggleChatVisibility(player)
         updateChatGUI(player)
         -- إعطاء التركيز لحقل النص
         guiData.TextBox:CaptureFocus()
+        
+        -- التمرير تلقائياً للأحدث
+        delay(0.1, function()
+            if guiData.ScrollFrame then
+                guiData.ScrollFrame.CanvasPosition = Vector2.new(0, guiData.ScrollFrame.AbsoluteCanvasSize.Y)
+            end
+        end)
     end
 end
 
@@ -247,6 +256,14 @@ function sendMessage(sender, message)
         -- تحديث واجهة الشات إذا كانت مفتوحة
         if playerGuis[player] and playerGuis[player].IsVisible then
             updateChatGUI(player)
+            
+            -- التمرير تلقائياً للأحدث
+            delay(0.1, function()
+                local guiData = playerGuis[player]
+                if guiData and guiData.ScrollFrame then
+                    guiData.ScrollFrame.CanvasPosition = Vector2.new(0, guiData.ScrollFrame.AbsoluteCanvasSize.Y)
+                end
+            end)
         end
     end
     
@@ -335,9 +352,8 @@ function updateChatGUI(player)
         end
     end
     
-    -- التمرير للأسفل لرؤية أحدث الرسائل
+    -- تحديث حجم الكانفاس للسحب
     scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollFrame.UIListLayout.AbsoluteContentSize.Y)
-    scrollFrame.CanvasPosition = Vector2.new(0, scrollFrame.CanvasSize.Y.Offset)
 end
 
 -- وظيفة إنشاء تسمية للرسالة (مصغرة للجوال)
@@ -418,3 +434,4 @@ end
 print("✅ نظام الشات العالمي (v1.1) يعمل بنجاح!")
 print("📱 جميع اللاعبين يمكنهم المحادثة مع بعضهم البعض")
 print("💬 اضغط على الزر البنفسجي المتحرك لفتح الشات")
+print("🔄 يمكنك سحب الشات لأعلى ولأسفل لمشاهدة جميع الرسائل")
