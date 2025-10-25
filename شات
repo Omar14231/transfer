@@ -45,7 +45,7 @@ function createChatGUI(player)
     titleLabel.Size = UDim2.new(1, 0, 0, 35)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-    titleLabel.Text = "💬 الشات v1.0"
+    titleLabel.Text = "💬 الشات v1.1"
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLabel.TextSize = 16
     titleLabel.Font = Enum.Font.GothamBold
@@ -85,19 +85,19 @@ function createChatGUI(player)
     messageList.Padding = UDim.new(0, 3)
     messageList.Parent = scrollFrame
     
-    -- زر الكتابة السريعة (زر أحمر)
+    -- زر الكتابة السريعة (زر أحمر) - تم تغيير موقعه إلى اليمين
     local quickChatButton = Instance.new("TextButton")
-    quickChatButton.Size = UDim2.new(1, -10, 0, 30)
-    quickChatButton.Position = UDim2.new(0, 5, 1, -75)
-    quickChatButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    quickChatButton.Text = "🔴 اكتب هنا"
+    quickChatButton.Size = UDim2.new(0, 60, 0, 60) -- حجم أكبر
+    quickChatButton.Position = UDim2.new(1, -70, 0, 50) -- في أعلى اليمين
+    quickChatButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50) -- أحمر
+    quickChatButton.Text = "💬"
     quickChatButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    quickChatButton.TextSize = 12
+    quickChatButton.TextSize = 20
     quickChatButton.Font = Enum.Font.GothamBold
-    quickChatButton.Parent = mainFrame
+    quickChatButton.Parent = screenGui -- خارج الإطار الرئيسي
     
     local quickChatCorner = Instance.new("UICorner")
-    quickChatCorner.CornerRadius = UDim.new(0, 6)
+    quickChatCorner.CornerRadius = UDim.new(0, 12)
     quickChatCorner.Parent = quickChatButton
     
     -- منطقة الكتابة (مصغرة)
@@ -183,6 +183,7 @@ function toggleChatVisibility(player)
     
     guiData.IsVisible = not guiData.IsVisible
     guiData.MainFrame.Visible = guiData.IsVisible
+    guiData.QuickChatButton.Visible = not guiData.IsVisible
     
     if not guiData.IsVisible then
         createShowChatButton(player)
@@ -337,7 +338,7 @@ function sendMessage(sender, message)
     -- تحديث واجهات جميع اللاعبين
     updateAllChatGuis()
     
-    -- بث الرسالة لجميع اللاعبين
+    -- بث الرسالة لجميع اللاعبين (تم التعديل هنا)
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= sender then
             showMessageAboveHead(sender, message)
