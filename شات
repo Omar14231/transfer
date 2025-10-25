@@ -2,6 +2,7 @@
 local Players = game:GetService("Players")
 local TextService = game:GetService("TextService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 -- إعدادات الشات
 local CHAT_DURATION = 15 -- مدة ظهور الرسالة فوق الرأس (ثانية)
@@ -46,7 +47,7 @@ function createChatGUI(player)
     titleLabel.Size = UDim2.new(1, 0, 0, 35)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-    titleLabel.Text = "💬 الشات العام"
+    titleLabel.Text = "شات العام 💬 (v1.1)"
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLabel.TextSize = 16
     titleLabel.Font = Enum.Font.GothamBold
@@ -126,20 +127,48 @@ function createChatGUI(player)
     buttonCorner.CornerRadius = UDim.new(0, 5)
     buttonCorner.Parent = sendButton
     
-    -- زر فتح الشات الرئيسي (أحمر - في أعلى اليمين)
+    -- زر فتح الشات الرئيسي (أحمر - في أعلى اليمين) مع تأثيرات
     local openChatButton = Instance.new("TextButton")
-    openChatButton.Size = UDim2.new(0, 60, 0, 60)
-    openChatButton.Position = UDim2.new(1, -70, 0, 50)
-    openChatButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    openChatButton.Size = UDim2.new(0, 70, 0, 70) -- حجم أكبر
+    openChatButton.Position = UDim2.new(1, -80, 0, 50) -- في أعلى اليمين
+    openChatButton.BackgroundColor3 = Color3.fromRGB(128, 0, 128) -- بنفسجي
     openChatButton.Text = "💬"
     openChatButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    openChatButton.TextSize = 20
+    openChatButton.TextSize = 24
     openChatButton.Font = Enum.Font.GothamBold
     openChatButton.Parent = screenGui
     
     local openChatCorner = Instance.new("UICorner")
-    openChatCorner.CornerRadius = UDim.new(0, 12)
+    openChatCorner.CornerRadius = UDim.new(0, 15) -- زوايا أكثر استدارة
     openChatCorner.Parent = openChatButton
+    
+    -- تأثير تدرج الألوان للزر
+    local colorSequence = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 128)),  -- بنفسجي
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 255)), -- ماجنتا
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(75, 0, 130))  -- نيلي
+    })
+    
+    local uigradient = Instance.new("UIGradient")
+    uigradient.Color = colorSequence
+    uigradient.Rotation = 45
+    uigradient.Parent = openChatButton
+    
+    -- تأثير الوميض
+    local pulseTween = TweenService:Create(
+        uigradient,
+        TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+        {Rotation = 405} -- دوران كامل + 45
+    )
+    pulseTween:Play()
+    
+    -- تأثير الطفو (يتحرك قليلاً)
+    local floatTween = TweenService:Create(
+        openChatButton,
+        TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+        {Position = UDim2.new(1, -80, 0, 45)} -- يتحرك لأعلى قليلاً
+    )
+    floatTween:Play()
     
     -- حفظ البيانات
     playerGuis[player] = {
@@ -210,13 +239,16 @@ function sendMessage(sender, message)
         Timestamp = os.time()
     })
     
-    -- عرض الرسالة فوق رأس المرسل لجميع اللاعبين
+    -- بث الرسالة لجميع اللاعبين
     for _, player in pairs(Players:GetPlayers()) do
+        -- عرض الرسالة فوق رأس المرسل
         showMessageAboveHead(sender, message, player)
+        
+        -- تحديث واجهة الشات إذا كانت مفتوحة
+        if playerGuis[player] and playerGuis[player].IsVisible then
+            updateChatGUI(player)
+        end
     end
-    
-    -- تحديث واجهات جميع اللاعبين
-    updateAllChatGuis()
     
     -- طباعة تأكيد في الكونسول
     print("📢 " .. sender.Name .. " أرسل رسالة: " .. message)
@@ -243,7 +275,7 @@ function showMessageAboveHead(sender, message, receiver)
     billboard.Size = UDim2.new(0, 200, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 2.5, 0)
     billboard.AlwaysOnTop = true
-    billboard.MaxDistance = 50 -- مسافة الرؤية
+    billboard.MaxDistance = 100 -- مسافة رؤية أكبر
     billboard.Parent = head
     
     -- إطار الرسالة
@@ -357,18 +389,9 @@ end
 
 -- عند دخول لاعب جديد
 function onPlayerAdded(player)
-    -- الانتظار حتى تحميل الشخصية
-    player.CharacterAdded:Connect(function(character)
-        wait(1)
-        createChatGUI(player)
-        updateChatGUI(player)
-    end)
-    
-    -- إذا كانت الشخصية موجودة مسبقاً
-    if player.Character then
-        createChatGUI(player)
-        updateChatGUI(player)
-    end
+    -- إنشاء الشات فوراً بدون انتظار الشخصية
+    createChatGUI(player)
+    updateChatGUI(player)
     
     -- رسالة ترحيب
     print("🎮 لاعب انضم: " .. player.Name .. " - الشات جاهز!")
@@ -392,6 +415,6 @@ for _, player in pairs(Players:GetPlayers()) do
     onPlayerAdded(player)
 end
 
-print("✅ نظام الشات العالمي يعمل بنجاح!")
+print("✅ نظام الشات العالمي (v1.1) يعمل بنجاح!")
 print("📱 جميع اللاعبين يمكنهم المحادثة مع بعضهم البعض")
-print("💬 اضغط على الزر الأحمر لفتح الشات")
+print("💬 اضغط على الزر البنفسجي المتحرك لفتح الشات")
