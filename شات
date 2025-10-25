@@ -1,16 +1,42 @@
 -- Script (يضع في ServerScriptService)
 local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
 local TextService = game:GetService("TextService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 -- إعدادات الشات
-local CHAT_DURATION = 15 -- مدة ظهور الرسالة فوق الرأس (ثانية)
-local MAX_MESSAGE_LENGTH = 100 -- أقصى طول للرسالة
+local CHAT_DURATION = 15
+local MAX_MESSAGE_LENGTH = 100
+
+-- إعدادات الديسكورد (ضع رابط الويب هوك هنا)
+local DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1431492102474305566/HiKbQ6RDhAHVs-h7kbqBLaOpBYDO39PVCbucEgWNwmqhtki2rbyBCY3KjMGmNuYZb_f6"
 
 -- تخزين الرسائل والواجهات
 local playerGuis = {}
 local chatMessages = {}
+
+-- وظيفة إرسال رسالة للديسكورد
+function sendToDiscord(playerName, message)
+    local success, result = pcall(function()
+        local data = {
+            ["content"] = playerName .. ": " .. message,
+            ["username"] = "Roblox Chat Bot"
+        }
+        
+        local headers = {
+            ["Content-Type"] = "application/json"
+        }
+        
+        return HttpService:PostAsync(DISCORD_WEBHOOK_URL, HttpService:JSONEncode(data), headers)
+    end)
+    
+    if success then
+        print("✅ تم إرسال الرسالة للديسكورد")
+    else
+        print("❌ فشل إرسال الرسالة للديسكورد: " .. result)
+    end
+end
 
 -- وظيفة إنشاء واجهة الشات للاعب
 function createChatGUI(player)
@@ -21,14 +47,14 @@ function createChatGUI(player)
     screenGui.Name = "GlobalChat"
     screenGui.Parent = playerGui
     
-    -- الإطار الرئيسي (مصغر للجوال)
+    -- الإطار الرئيسي
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0.9, 0, 0.7, 0) -- 90% عرض, 70% ارتفاع
-    mainFrame.Position = UDim2.new(0.05, 0, 0.15, 0) -- في الأعلى
+    mainFrame.Size = UDim2.new(0.9, 0, 0.7, 0)
+    mainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     mainFrame.BackgroundTransparency = 0.1
     mainFrame.BorderSizePixel = 0
-    mainFrame.Visible = false -- مخفي في البداية
+    mainFrame.Visible = false
     mainFrame.Parent = screenGui
     
     -- زوايا مستديرة
@@ -47,7 +73,7 @@ function createChatGUI(player)
     titleLabel.Size = UDim2.new(1, 0, 0, 35)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
-    titleLabel.Text = "شات العام 💬 (v1.1)"
+    titleLabel.Text = "شات العام 💬 (v2.0)"
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLabel.TextSize = 16
     titleLabel.Font = Enum.Font.GothamBold
@@ -58,10 +84,10 @@ function createChatGUI(player)
     titleCorner.CornerRadius = UDim.new(0, 10)
     titleCorner.Parent = titleLabel
     
-    -- زر إخفاء القائمة (تم نقله لليمين)
+    -- زر إخفاء القائمة (يمين)
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 25, 0, 25)
-    closeButton.Position = UDim2.new(1, -30, 0, 5) -- يمين
+    closeButton.Position = UDim2.new(1, -30, 0, 5)
     closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     closeButton.Text = "X"
     closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -73,23 +99,23 @@ function createChatGUI(player)
     closeCorner.CornerRadius = UDim.new(0, 6)
     closeCorner.Parent = closeButton
     
-    -- منطقة السجل (أصغر للجوال) - مع إمكانية السحب
+    -- منطقة السجل (مضبوطة)
     local scrollFrame = Instance.new("ScrollingFrame")
     scrollFrame.Size = UDim2.new(1, -10, 1, -120)
     scrollFrame.Position = UDim2.new(0, 5, 0, 40)
     scrollFrame.BackgroundTransparency = 1
     scrollFrame.BorderSizePixel = 0
-    scrollFrame.ScrollBarThickness = 6 -- أسمك
+    scrollFrame.ScrollBarThickness = 6
     scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 200)
     scrollFrame.VerticalScrollBarInset = Enum.ScrollBarInset.Always
     scrollFrame.Parent = mainFrame
     
     -- قائمة الرسائل
     local messageList = Instance.new("UIListLayout")
-    messageList.Padding = UDim.new(0, 5) -- مسافة أكبر بين الرسائل
+    messageList.Padding = UDim.new(0, 5)
     messageList.Parent = scrollFrame
     
-    -- منطقة الكتابة (مصغرة)
+    -- منطقة الكتابة
     local inputFrame = Instance.new("Frame")
     inputFrame.Size = UDim2.new(1, -10, 0, 35)
     inputFrame.Position = UDim2.new(0, 5, 1, -35)
@@ -101,7 +127,7 @@ function createChatGUI(player)
     inputCorner.CornerRadius = UDim.new(0, 6)
     inputCorner.Parent = inputFrame
     
-    -- حقل النص (مصغر)
+    -- حقل النص
     local textBox = Instance.new("TextBox")
     textBox.Size = UDim2.new(1, -60, 1, -6)
     textBox.Position = UDim2.new(0, 5, 0, 3)
@@ -114,7 +140,7 @@ function createChatGUI(player)
     textBox.TextXAlignment = Enum.TextXAlignment.Left
     textBox.Parent = inputFrame
     
-    -- زر الإرسال (مصغر)
+    -- زر الإرسال
     local sendButton = Instance.new("TextButton")
     sendButton.Size = UDim2.new(0, 50, 1, -6)
     sendButton.Position = UDim2.new(1, -55, 0, 3)
@@ -129,11 +155,11 @@ function createChatGUI(player)
     buttonCorner.CornerRadius = UDim.new(0, 5)
     buttonCorner.Parent = sendButton
     
-    -- زر فتح الشات الرئيسي (أحمر - في أعلى اليمين) مع تأثيرات
+    -- زر فتح الشات (بنفسجي متحرك)
     local openChatButton = Instance.new("TextButton")
-    openChatButton.Size = UDim2.new(0, 70, 0, 70) -- حجم أكبر
-    openChatButton.Position = UDim2.new(1, -80, 0, 50) -- في أعلى اليمين
-    openChatButton.BackgroundColor3 = Color3.fromRGB(128, 0, 128) -- بنفسجي
+    openChatButton.Size = UDim2.new(0, 70, 0, 70)
+    openChatButton.Position = UDim2.new(1, -80, 0, 50)
+    openChatButton.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
     openChatButton.Text = "💬"
     openChatButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     openChatButton.TextSize = 24
@@ -141,14 +167,14 @@ function createChatGUI(player)
     openChatButton.Parent = screenGui
     
     local openChatCorner = Instance.new("UICorner")
-    openChatCorner.CornerRadius = UDim.new(0, 15) -- زوايا أكثر استدارة
+    openChatCorner.CornerRadius = UDim.new(0, 15)
     openChatCorner.Parent = openChatButton
     
-    -- تأثير تدرج الألوان للزر
+    -- تأثيرات الزر
     local colorSequence = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 128)),  -- بنفسجي
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 255)), -- ماجنتا
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(75, 0, 130))  -- نيلي
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 128)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(75, 0, 130))
     })
     
     local uigradient = Instance.new("UIGradient")
@@ -156,19 +182,17 @@ function createChatGUI(player)
     uigradient.Rotation = 45
     uigradient.Parent = openChatButton
     
-    -- تأثير الوميض
     local pulseTween = TweenService:Create(
         uigradient,
         TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-        {Rotation = 405} -- دوران كامل + 45
+        {Rotation = 405}
     )
     pulseTween:Play()
     
-    -- تأثير الطفو (يتحرك قليلاً)
     local floatTween = TweenService:Create(
         openChatButton,
         TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-        {Position = UDim2.new(1, -80, 0, 45)} -- يتحرك لأعلى قليلاً
+        {Position = UDim2.new(1, -80, 0, 45)}
     )
     floatTween:Play()
     
@@ -218,12 +242,9 @@ function toggleChatVisibility(player)
     guiData.OpenChatButton.Visible = not guiData.IsVisible
     
     if guiData.IsVisible then
-        -- تحديث الشات عند فتحه
         updateChatGUI(player)
-        -- إعطاء التركيز لحقل النص
         guiData.TextBox:CaptureFocus()
         
-        -- التمرير تلقائياً للأحدث
         delay(0.1, function()
             if guiData.ScrollFrame then
                 guiData.ScrollFrame.CanvasPosition = Vector2.new(0, guiData.ScrollFrame.AbsoluteCanvasSize.Y)
@@ -238,7 +259,7 @@ function sendMessage(sender, message)
         return
     end
     
-    -- تنظيف النص من الرموز الخطيرة
+    -- تنظيف النص
     message = string.gsub(message, "[<>]", "")
     
     -- إضافة الرسالة للجميع
@@ -247,6 +268,9 @@ function sendMessage(sender, message)
         Message = message,
         Timestamp = os.time()
     })
+    
+    -- إرسال للديسكورد
+    sendToDiscord(sender.Name, message)
     
     -- بث الرسالة لجميع اللاعبين
     for _, player in pairs(Players:GetPlayers()) do
@@ -257,7 +281,6 @@ function sendMessage(sender, message)
         if playerGuis[player] and playerGuis[player].IsVisible then
             updateChatGUI(player)
             
-            -- التمرير تلقائياً للأحدث
             delay(0.1, function()
                 local guiData = playerGuis[player]
                 if guiData and guiData.ScrollFrame then
@@ -267,8 +290,27 @@ function sendMessage(sender, message)
         end
     end
     
-    -- طباعة تأكيد في الكونسول
     print("📢 " .. sender.Name .. " أرسل رسالة: " .. message)
+end
+
+-- وظيفة إضافة رسالة من الديسكورد
+function addMessageFromDiscord(playerName, message)
+    -- إضافة الرسالة للجميع
+    table.insert(chatMessages, {
+        Player = {Name = playerName},
+        Message = message,
+        Timestamp = os.time(),
+        FromDiscord = true
+    })
+    
+    -- تحديث واجهات جميع اللاعبين
+    for player, guiData in pairs(playerGuis) do
+        if guiData.IsVisible then
+            updateChatGUI(player)
+        end
+    end
+    
+    print("📱 رسالة من الديسكورد: " .. playerName .. ": " .. message)
 end
 
 -- وظيفة عرض الرسالة فوق الرأس
@@ -292,7 +334,7 @@ function showMessageAboveHead(sender, message, receiver)
     billboard.Size = UDim2.new(0, 200, 0, 50)
     billboard.StudsOffset = Vector3.new(0, 2.5, 0)
     billboard.AlwaysOnTop = true
-    billboard.MaxDistance = 100 -- مسافة رؤية أكبر
+    billboard.MaxDistance = 100
     billboard.Parent = head
     
     -- إطار الرسالة
@@ -327,15 +369,6 @@ function showMessageAboveHead(sender, message, receiver)
     end)
 end
 
--- وظيفة تحديث واجهات الشات للجميع
-function updateAllChatGuis()
-    for player, guiData in pairs(playerGuis) do
-        if player and player.Parent and guiData.IsVisible then
-            updateChatGUI(player)
-        end
-    end
-end
-
 -- وظيفة تحديث واجهة الشات للاعب
 function updateChatGUI(player)
     local guiData = playerGuis[player]
@@ -344,11 +377,11 @@ function updateChatGUI(player)
     local scrollFrame = guiData.ScrollFrame
     scrollFrame:ClearAllChildren()
     
-    -- عرض الرسائل من الأقدم إلى الأحدث
+    -- عرض الرسائل من الأقدم إلى الأحدث (مضبوط)
     for i = 1, #chatMessages do
         local messageData = chatMessages[i]
         if messageData then
-            createMessageLabel(scrollFrame, messageData.Player, messageData.Message, messageData.Timestamp, i)
+            createMessageLabel(scrollFrame, messageData.Player, messageData.Message, messageData.Timestamp, i, messageData.FromDiscord)
         end
     end
     
@@ -356,8 +389,8 @@ function updateChatGUI(player)
     scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollFrame.UIListLayout.AbsoluteContentSize.Y)
 end
 
--- وظيفة إنشاء تسمية للرسالة (مصغرة للجوال)
-function createMessageLabel(parent, player, message, timestamp, index)
+-- وظيفة إنشاء تسمية للرسالة (مضبوطة)
+function createMessageLabel(parent, player, message, timestamp, index, fromDiscord)
     local messageFrame = Instance.new("Frame")
     messageFrame.Size = UDim2.new(1, 0, 0, 0)
     messageFrame.BackgroundTransparency = 1
@@ -367,12 +400,12 @@ function createMessageLabel(parent, player, message, timestamp, index)
     local messageLayout = Instance.new("UIListLayout")
     messageLayout.Parent = messageFrame
     
-    -- اسم اللاعب
+    -- اسم اللاعب (بلون مختلف إذا من الديسكورد)
     local playerLabel = Instance.new("TextLabel")
     playerLabel.Size = UDim2.new(1, 0, 0, 18)
     playerLabel.BackgroundTransparency = 1
-    playerLabel.Text = player.Name
-    playerLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+    playerLabel.Text = player.Name .. (fromDiscord and " 🎮" or "")
+    playerLabel.TextColor3 = fromDiscord and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(100, 200, 255)
     playerLabel.TextSize = 12
     playerLabel.Font = Enum.Font.GothamBold
     playerLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -405,11 +438,8 @@ end
 
 -- عند دخول لاعب جديد
 function onPlayerAdded(player)
-    -- إنشاء الشات فوراً بدون انتظار الشخصية
     createChatGUI(player)
     updateChatGUI(player)
-    
-    -- رسالة ترحيب
     print("🎮 لاعب انضم: " .. player.Name .. " - الشات جاهز!")
 end
 
@@ -431,7 +461,7 @@ for _, player in pairs(Players:GetPlayers()) do
     onPlayerAdded(player)
 end
 
-print("✅ نظام الشات العالمي (v1.1) يعمل بنجاح!")
+print("✅ نظام الشات العالمي (v2.0) يعمل بنجاح!")
 print("📱 جميع اللاعبين يمكنهم المحادثة مع بعضهم البعض")
+print("🔗 متصل مع الديسكورد")
 print("💬 اضغط على الزر البنفسجي المتحرك لفتح الشات")
-print("🔄 يمكنك سحب الشات لأعلى ولأسفل لمشاهدة جميع الرسائل")
