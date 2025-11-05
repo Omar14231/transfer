@@ -1,4 +1,4 @@
--- Mobile Chat System for All Devices
+-- Mobile Chat System for Script Users
 -- By: [Your Name]
 
 local Players = game:GetService("Players")
@@ -16,150 +16,135 @@ mainFrame.Size = UDim2.new(1, 0, 1, 0)
 mainFrame.BackgroundTransparency = 1
 mainFrame.Parent = screenGui
 
--- زر فتح الشات - يظهر على جميع الأجهزة
+-- زر الشات الصغير
 local chatButton = Instance.new("TextButton")
 chatButton.Name = "ChatButton"
-chatButton.Size = UDim2.new(0, 120, 0, 50)
-chatButton.Position = UDim2.new(0, 20, 0.8, -25)
+chatButton.Size = UDim2.new(0, 60, 0, 60)
+chatButton.Position = UDim2.new(0, 20, 0.8, -30)
 chatButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-chatButton.Text = "💬 فتح الشات"
+chatButton.Text = "💬"
 chatButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 chatButton.Font = Enum.Font.GothamBold
-chatButton.TextSize = 16
+chatButton.TextSize = 20
 chatButton.BorderSizePixel = 0
 chatButton.Parent = mainFrame
 
--- تصميم الزر
+-- جعل الزر دائري
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 10)
+corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = chatButton
 
-local shadow = Instance.new("UIStroke")
-shadow.Color = Color3.fromRGB(0, 100, 200)
-shadow.Thickness = 2
-shadow.Parent = chatButton
-
--- تأثيرات الزر
-chatButton.MouseEnter:Connect(function()
-    TweenService:Create(chatButton, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    }):Play()
-end)
-
-chatButton.MouseLeave:Connect(function()
-    TweenService:Create(chatButton, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-    }):Play()
-end)
-
--- إطار الشات الرئيسي
+-- إطار الشات الصغير
 local chatFrame = Instance.new("Frame")
 chatFrame.Name = "ChatFrame"
-chatFrame.Size = UDim2.new(0, 350, 0, 450)
-chatFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
-chatFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+chatFrame.Size = UDim2.new(0.5, 0, 0.3, 0) -- نصف عرض الشاشة، 30% ارتفاع
+chatFrame.Position = UDim2.new(0.25, 0, 0.35, 0) -- منتصف الشاشة
+chatFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 chatFrame.BorderSizePixel = 0
 chatFrame.Visible = false
 chatFrame.Parent = mainFrame
 chatFrame.ClipsDescendants = true
 
 local chatCorner = Instance.new("UICorner")
-chatCorner.CornerRadius = UDim.new(0, 15)
+chatCorner.CornerRadius = UDim.new(0, 10)
 chatCorner.Parent = chatFrame
 
 -- شريط العنوان
 local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 40)
-titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+titleBar.Size = UDim2.new(1, 0, 0, 25)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 titleBar.Parent = chatFrame
 
 local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 15)
+titleCorner.CornerRadius = UDim.new(0, 10)
 titleCorner.Parent = titleBar
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -50, 1, 0)
-titleLabel.Position = UDim2.new(0, 15, 0, 0)
+titleLabel.Size = UDim2.new(1, -30, 1, 0)
+titleLabel.Position = UDim2.new(0, 8, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "💬 نظام الشات"
+titleLabel.Text = "💬 الشات"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 16
+titleLabel.TextSize = 12
 titleLabel.Parent = titleBar
 
--- زر الإغلاق
+-- زر الإغلاق (X)
 local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.Size = UDim2.new(0, 20, 0, 20)
+closeButton.Position = UDim2.new(1, -25, 0, 2)
 closeButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
 closeButton.Text = "X"
 closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeButton.Font = Enum.Font.GothamBold
-closeButton.TextSize = 14
+closeButton.TextSize = 10
 closeButton.Parent = titleBar
 
 local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(1, 0)
 closeCorner.Parent = closeButton
 
--- سجل الشات
+-- سجل الشات الصغير
 local chatLogScrollingFrame = Instance.new("ScrollingFrame")
-chatLogScrollingFrame.Size = UDim2.new(1, -10, 1, -120)
-chatLogScrollingFrame.Position = UDim2.new(0, 5, 0, 45)
+chatLogScrollingFrame.Size = UDim2.new(1, -5, 1, -70) -- مساحة صغيرة للسجل
+chatLogScrollingFrame.Position = UDim2.new(0, 2, 0, 27)
 chatLogScrollingFrame.BackgroundTransparency = 1
 chatLogScrollingFrame.BorderSizePixel = 0
-chatLogScrollingFrame.ScrollBarThickness = 8
+chatLogScrollingFrame.ScrollBarThickness = 4
 chatLogScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
 chatLogScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 chatLogScrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 chatLogScrollingFrame.Parent = chatFrame
 
 local chatLogLayout = Instance.new("UIListLayout")
-chatLogLayout.Padding = UDim.new(0, 8)
+chatLogLayout.Padding = UDim.new(0, 3)
 chatLogLayout.Parent = chatLogScrollingFrame
 
--- منطقة الكتابة
+-- شريط الكتابة (نصف الشاشة)
 local inputFrame = Instance.new("Frame")
-inputFrame.Size = UDim2.new(1, -20, 0, 50)
-inputFrame.Position = UDim2.new(0, 10, 1, -65)
+inputFrame.Size = UDim2.new(1, -10, 0, 35)
+inputFrame.Position = UDim2.new(0, 5, 1, -40)
 inputFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 inputFrame.Parent = chatFrame
 
 local inputCorner = Instance.new("UICorner")
-inputCorner.CornerRadius = UDim.new(0, 10)
+inputCorner.CornerRadius = UDim.new(0, 6)
 inputCorner.Parent = inputFrame
 
 local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(1, -80, 1, -10)
-textBox.Position = UDim2.new(0, 10, 0, 5)
+textBox.Size = UDim2.new(1, -50, 1, -6)
+textBox.Position = UDim2.new(0, 5, 0, 3)
 textBox.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-textBox.PlaceholderText = "اكتب رسالتك هنا..."
+textBox.PlaceholderText = "اكتب رسالتك..."
 textBox.PlaceholderColor3 = Color3.fromRGB(180, 180, 180)
 textBox.Font = Enum.Font.Gotham
-textBox.TextSize = 14
+textBox.TextSize = 12
 textBox.TextXAlignment = Enum.TextXAlignment.Left
 textBox.ClearTextOnFocus = false
 textBox.Parent = inputFrame
 
 local textBoxCorner = Instance.new("UICorner")
-textBoxCorner.CornerRadius = UDim.new(0, 8)
+textBoxCorner.CornerRadius = UDim.new(0, 4)
 textBoxCorner.Parent = textBox
 
 local sendButton = Instance.new("TextButton")
-sendButton.Size = UDim2.new(0, 60, 1, -10)
-sendButton.Position = UDim2.new(1, -65, 0, 5)
+sendButton.Size = UDim2.new(0, 40, 1, -6)
+sendButton.Position = UDim2.new(1, -45, 0, 3)
 sendButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-sendButton.Text = "إرسال"
+sendButton.Text = "➤"
 sendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 sendButton.Font = Enum.Font.GothamBold
 sendButton.TextSize = 12
 sendButton.Parent = inputFrame
 
 local sendCorner = Instance.new("UICorner")
-sendCorner.CornerRadius = UDim.new(0, 8)
+sendCorner.CornerRadius = UDim.new(0, 4)
 sendCorner.Parent = sendButton
+
+-- قائمة لتتبع مستخدمي السكريبت
+local scriptUsers = {}
 
 -- وظيفة إضافة رسالة للسجل
 local function addMessageToLog(senderName, message, isIncoming)
@@ -170,7 +155,7 @@ local function addMessageToLog(senderName, message, isIncoming)
     messageFrame.Parent = chatLogScrollingFrame
     
     local messageBubble = Instance.new("Frame")
-    messageBubble.Size = UDim2.new(0.8, 0, 0, 0)
+    messageBubble.Size = UDim2.new(0.9, 0, 0, 0)
     messageBubble.BackgroundColor3 = isIncoming and Color3.fromRGB(60, 60, 80) or Color3.fromRGB(0, 100, 200)
     messageBubble.AutomaticSize = Enum.AutomaticSize.Y
     messageBubble.Position = isIncoming and UDim2.new(0, 5, 0, 0) or UDim2.new(1, -5, 0, 0)
@@ -178,28 +163,28 @@ local function addMessageToLog(senderName, message, isIncoming)
     messageBubble.Parent = messageFrame
     
     local bubbleCorner = Instance.new("UICorner")
-    bubbleCorner.CornerRadius = UDim.new(0, 12)
+    bubbleCorner.CornerRadius = UDim.new(0, 8)
     bubbleCorner.Parent = messageBubble
 
     local senderLabel = Instance.new("TextLabel")
-    senderLabel.Size = UDim2.new(1, -10, 0, 20)
-    senderLabel.Position = UDim2.new(0, 5, 0, 2)
+    senderLabel.Size = UDim2.new(1, -6, 0, 14)
+    senderLabel.Position = UDim2.new(0, 3, 0, 2)
     senderLabel.BackgroundTransparency = 1
     senderLabel.Text = senderName
     senderLabel.TextColor3 = Color3.fromRGB(255, 255, 150)
     senderLabel.Font = Enum.Font.GothamBold
-    senderLabel.TextSize = 11
+    senderLabel.TextSize = 9
     senderLabel.TextXAlignment = Enum.TextXAlignment.Left
     senderLabel.Parent = messageBubble
     
     local messageLabel = Instance.new("TextLabel")
-    messageLabel.Size = UDim2.new(1, -10, 0, 0)
-    messageLabel.Position = UDim2.new(0, 5, 0, 22)
+    messageLabel.Size = UDim2.new(1, -6, 0, 0)
+    messageLabel.Position = UDim2.new(0, 3, 0, 16)
     messageLabel.BackgroundTransparency = 1
     messageLabel.Text = message
     messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     messageLabel.Font = Enum.Font.Gotham
-    messageLabel.TextSize = 13
+    messageLabel.TextSize = 10
     messageLabel.TextWrapped = true
     messageLabel.AutomaticSize = Enum.AutomaticSize.Y
     messageLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -218,8 +203,8 @@ local function displayMessageAboveHead(message, senderName, targetPlayer)
     if not head then return end
     
     local billboardGui = Instance.new("BillboardGui")
-    billboardGui.Size = UDim2.new(0, 400, 0, 100)
-    billboardGui.StudsOffset = Vector3.new(0, 4, 0)
+    billboardGui.Size = UDim2.new(0, 300, 0, 80)
+    billboardGui.StudsOffset = Vector3.new(0, 3, 0)
     billboardGui.Adornee = head
     billboardGui.Parent = head
     billboardGui.AlwaysOnTop = true
@@ -227,41 +212,41 @@ local function displayMessageAboveHead(message, senderName, targetPlayer)
     local background = Instance.new("Frame")
     background.Size = UDim2.new(1, 0, 1, 0)
     background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    background.BackgroundTransparency = 0.2
+    background.BackgroundTransparency = 0.3
     background.Parent = billboardGui
     
     local bgCorner = Instance.new("UICorner")
-    bgCorner.CornerRadius = UDim.new(0, 20)
+    bgCorner.CornerRadius = UDim.new(0, 15)
     bgCorner.Parent = background
     
     local emojiLabel = Instance.new("TextLabel")
-    emojiLabel.Size = UDim2.new(0, 40, 0, 40)
-    emojiLabel.Position = UDim2.new(0.5, -20, 0, 5)
+    emojiLabel.Size = UDim2.new(0, 30, 0, 30)
+    emojiLabel.Position = UDim2.new(0.5, -15, 0, 5)
     emojiLabel.BackgroundTransparency = 1
     emojiLabel.Text = "🗨️"
     emojiLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     emojiLabel.Font = Enum.Font.GothamBold
-    emojiLabel.TextSize = 24
+    emojiLabel.TextSize = 18
     emojiLabel.Parent = billboardGui
     
     local senderText = Instance.new("TextLabel")
-    senderText.Size = UDim2.new(1, -10, 0, 20)
-    senderText.Position = UDim2.new(0, 5, 0, 45)
+    senderText.Size = UDim2.new(1, -10, 0, 15)
+    senderText.Position = UDim2.new(0, 5, 0, 35)
     senderText.BackgroundTransparency = 1
-    senderText.Text = "من: " .. senderName
+    senderText.Text = senderName
     senderText.TextColor3 = Color3.fromRGB(255, 255, 150)
     senderText.Font = Enum.Font.GothamBold
-    senderText.TextSize = 12
+    senderText.TextSize = 10
     senderText.Parent = billboardGui
     
     local messageText = Instance.new("TextLabel")
-    messageText.Size = UDim2.new(1, -10, 0, 30)
-    messageText.Position = UDim2.new(0, 5, 0, 65)
+    messageText.Size = UDim2.new(1, -10, 0, 25)
+    messageText.Position = UDim2.new(0, 5, 0, 50)
     messageText.BackgroundTransparency = 1
     messageText.Text = message
     messageText.TextColor3 = Color3.fromRGB(255, 255, 255)
     messageText.Font = Enum.Font.Gotham
-    messageText.TextSize = 14
+    messageText.TextSize = 11
     messageText.TextWrapped = true
     messageText.Parent = billboardGui
     
@@ -272,10 +257,10 @@ local function displayMessageAboveHead(message, senderName, targetPlayer)
     end)
 end
 
--- وظيفة إرسال الرسالة
-local function sendMessage()
+-- وظيفة إرسال الرسالة للجميع
+local function sendMessageToAll()
     local message = textBox.Text
-    if message == "" or message == "اكتب رسالتك هنا..." then return end
+    if message == "" or message == "اكتب رسالتك..." then return end
     
     -- إضافة الرسالة للسجل المحلي
     addMessageToLog(Players.LocalPlayer.Name, message, false)
@@ -287,13 +272,28 @@ local function sendMessage()
         end)
     end
     
-    addMessageToLog("النظام", "📢 تم إرسال الرسالة للجميع", false)
+    addMessageToLog("النظام", "تم الإرسال للجميع", false)
     textBox.Text = ""
+end
+
+-- تحديث قائمة مستخدمي السكريبت
+local function updateScriptUsers()
+    scriptUsers = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        -- يمكنك هنا إضافة شروط للكشف عن مستخدمي السكريبت
+        table.insert(scriptUsers, player.Name)
+    end
+    
+    -- تحديث العنوان بعدد المستخدمين
+    titleLabel.Text = "💬 الشات (" .. #scriptUsers .. ")"
 end
 
 -- أحداث الأزرار
 chatButton.MouseButton1Click:Connect(function()
     chatFrame.Visible = not chatFrame.Visible
+    if chatFrame.Visible then
+        updateScriptUsers()
+    end
 end)
 
 closeButton.MouseButton1Click:Connect(function()
@@ -301,20 +301,33 @@ closeButton.MouseButton1Click:Connect(function()
 end)
 
 sendButton.MouseButton1Click:Connect(function()
-    sendMessage()
+    sendMessageToAll()
 end)
 
 textBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
-        sendMessage()
+        sendMessageToAll()
     end
+end)
+
+-- مراقبة دخول وخروج اللاعبين
+Players.PlayerAdded:Connect(function(player)
+    wait(2)
+    updateScriptUsers()
+    addMessageToLog("النظام", player.Name .. " انضم", true)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    updateScriptUsers()
+    addMessageToLog("النظام", player.Name .. " غادر", true)
 end)
 
 -- بدء النظام
 screenGui.Parent = PlayerGui
+updateScriptUsers()
 
 -- رسالة ترحيبية
-addMessageToLog("النظام", "مرحباً! 💬 الشات جاهز للاستخدام", false)
-addMessageToLog("النظام", "اكتب رسالتك وسيتم عرضها للجميع", false)
+addMessageToLog("النظام", "مرحباً! الشات جاهز", false)
+addMessageToLog("النظام", "المستخدمون النشطون: " .. #scriptUsers, false)
 
-print("✅ نظام الشات يعمل - الزر يظهر على جميع الأجهزة")
+print("✅ نظام الشات الصغير يعمل!")
