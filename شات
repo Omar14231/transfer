@@ -1,14 +1,13 @@
--- Secure Private Chat System - CLEAR CHAT BUTTON
+-- Mobile Chat System for All Devices
 -- By: [Your Name]
 
 local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 
--- 🎮 إنشاء واجهة الشات
+-- إنشاء الواجهة الرئيسية
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "ChatSystem"
+screenGui.Name = "MobileChatSystem"
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -17,7 +16,7 @@ mainFrame.Size = UDim2.new(1, 0, 1, 0)
 mainFrame.BackgroundTransparency = 1
 mainFrame.Parent = screenGui
 
--- 🎯 زر الشات الواضح - يفتح القائمة مباشرة
+-- زر فتح الشات - يظهر على جميع الأجهزة
 local chatButton = Instance.new("TextButton")
 chatButton.Name = "ChatButton"
 chatButton.Size = UDim2.new(0, 120, 0, 50)
@@ -30,7 +29,7 @@ chatButton.TextSize = 16
 chatButton.BorderSizePixel = 0
 chatButton.Parent = mainFrame
 
--- جعل الزر جميل
+-- تصميم الزر
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 10)
 corner.Parent = chatButton
@@ -43,15 +42,13 @@ shadow.Parent = chatButton
 -- تأثيرات الزر
 chatButton.MouseEnter:Connect(function()
     TweenService:Create(chatButton, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(0, 170, 255),
-        Size = UDim2.new(0, 125, 0, 52)
+        BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     }):Play()
 end)
 
 chatButton.MouseLeave:Connect(function()
     TweenService:Create(chatButton, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(0, 150, 255),
-        Size = UDim2.new(0, 120, 0, 50)
+        BackgroundColor3 = Color3.fromRGB(0, 150, 255)
     }):Play()
 end)
 
@@ -91,7 +88,7 @@ titleLabel.Font = Enum.Font.GothamBold
 titleLabel.TextSize = 16
 titleLabel.Parent = titleBar
 
--- زر الإغلاق (X)
+-- زر الإغلاق
 local closeButton = Instance.new("TextButton")
 closeButton.Size = UDim2.new(0, 30, 0, 30)
 closeButton.Position = UDim2.new(1, -35, 0, 5)
@@ -106,7 +103,7 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(1, 0)
 closeCorner.Parent = closeButton
 
--- منطقة سجل الشات
+-- سجل الشات
 local chatLogScrollingFrame = Instance.new("ScrollingFrame")
 chatLogScrollingFrame.Size = UDim2.new(1, -10, 1, -120)
 chatLogScrollingFrame.Position = UDim2.new(0, 5, 0, 45)
@@ -122,7 +119,7 @@ local chatLogLayout = Instance.new("UIListLayout")
 chatLogLayout.Padding = UDim.new(0, 8)
 chatLogLayout.Parent = chatLogScrollingFrame
 
--- منطقة الإدخال
+-- منطقة الكتابة
 local inputFrame = Instance.new("Frame")
 inputFrame.Size = UDim2.new(1, -20, 0, 50)
 inputFrame.Position = UDim2.new(0, 10, 1, -65)
@@ -164,7 +161,7 @@ local sendCorner = Instance.new("UICorner")
 sendCorner.CornerRadius = UDim.new(0, 8)
 sendCorner.Parent = sendButton
 
--- ✉️ إضافة رسالة للسجل
+-- وظيفة إضافة رسالة للسجل
 local function addMessageToLog(senderName, message, isIncoming)
     local messageFrame = Instance.new("Frame")
     messageFrame.Size = UDim2.new(1, 0, 0, 0)
@@ -212,7 +209,7 @@ local function addMessageToLog(senderName, message, isIncoming)
     chatLogScrollingFrame.CanvasPosition = Vector2.new(0, chatLogScrollingFrame.AbsoluteCanvasSize.Y)
 end
 
--- 🎈 عرض الرسالة فوق الرأس
+-- وظيفة عرض الرسالة فوق الرأس
 local function displayMessageAboveHead(message, senderName, targetPlayer)
     local character = targetPlayer.Character
     if not character then return end
@@ -275,15 +272,15 @@ local function displayMessageAboveHead(message, senderName, targetPlayer)
     end)
 end
 
--- 📤 إرسال الرسالة
+-- وظيفة إرسال الرسالة
 local function sendMessage()
     local message = textBox.Text
     if message == "" or message == "اكتب رسالتك هنا..." then return end
     
-    -- إضافة للشات المحلي
+    -- إضافة الرسالة للسجل المحلي
     addMessageToLog(Players.LocalPlayer.Name, message, false)
     
-    -- عرض فوق رأس الجميع
+    -- عرض الرسالة فوق رأس جميع اللاعبين
     for _, player in pairs(Players:GetPlayers()) do
         pcall(function()
             displayMessageAboveHead(message, Players.LocalPlayer.Name, player)
@@ -294,7 +291,7 @@ local function sendMessage()
     textBox.Text = ""
 end
 
--- 🎯 الأحداث الرئيسية
+-- أحداث الأزرار
 chatButton.MouseButton1Click:Connect(function()
     chatFrame.Visible = not chatFrame.Visible
 end)
@@ -313,11 +310,11 @@ textBox.FocusLost:Connect(function(enterPressed)
     end
 end)
 
--- 🚀 البدء
+-- بدء النظام
 screenGui.Parent = PlayerGui
 
--- 📢 رسالة ترحيب
+-- رسالة ترحيبية
 addMessageToLog("النظام", "مرحباً! 💬 الشات جاهز للاستخدام", false)
 addMessageToLog("النظام", "اكتب رسالتك وسيتم عرضها للجميع", false)
 
-print("🎯 نظام الشات يعمل! - زر 'فتح الشات' واضح ومباشر")
+print("✅ نظام الشات يعمل - الزر يظهر على جميع الأجهزة")
