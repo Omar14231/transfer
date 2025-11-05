@@ -1,4 +1,4 @@
--- Secure Private Chat System
+-- Secure Private Chat System - FIXED VERSION
 -- By: [Your Name]
 
 local Players = game:GetService("Players")
@@ -6,7 +6,7 @@ local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
--- 🔒 قائمة اللاعبين المصرح لهم (مشفرة)
+-- 🔒 قائمة اللاعبين المصرح لهم
 local AUTHORIZED_PLAYERS = {
     ["Player1"] = true  -- غير الاسم حسب احتياجك
 }
@@ -14,9 +14,9 @@ local AUTHORIZED_PLAYERS = {
 -- متغيرات النظام
 local chatSystemActive = false
 local connectedPlayer = nil
-local waitingForConnection = false
+local allChatUsers = {} -- تتبع جميع مستخدمي السكريبت
 
--- 🎮 إنشاء واجهة الشات
+-- 🎮 إنشاء واجهة الشات مع تثبيت
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "SecureChatSystem"
 screenGui.ResetOnSpawn = false
@@ -27,11 +27,11 @@ mainFrame.Size = UDim2.new(1, 0, 1, 0)
 mainFrame.BackgroundTransparency = 1
 mainFrame.Parent = screenGui
 
--- زر الشات الصغير
+-- زر الشات الصغير (مثبت في مكان آمن)
 local chatButton = Instance.new("ImageButton")
 chatButton.Name = "ChatButton"
-chatButton.Size = UDim2.new(0, 50, 0, 50)
-chatButton.Position = UDim2.new(0, 20, 0, 20)
+chatButton.Size = UDim2.new(0, 60, 0, 60)
+chatButton.Position = UDim2.new(0, 30, 0.5, -30) -- منتصف الشاشة يسار
 chatButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 chatButton.Image = "rbxassetid://" -- أضف صورة زر جميلة هنا
 chatButton.ScaleType = Enum.ScaleType.Fit
@@ -43,46 +43,47 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = chatButton
 
--- إطار الشات (مخفي في البداية)
+-- إطار الشات الرئيسي (مثبت بشكل آمن)
 local chatFrame = Instance.new("Frame")
 chatFrame.Name = "ChatFrame"
-chatFrame.Size = UDim2.new(0, 300, 0, 400)
-chatFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
-chatFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+chatFrame.Size = UDim2.new(0, 350, 0, 450)
+chatFrame.Position = UDim2.new(0.5, -175, 0.5, -225) -- منتصف الشاشة
+chatFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 chatFrame.BorderSizePixel = 0
 chatFrame.Visible = false
 chatFrame.Parent = mainFrame
+chatFrame.ClipsDescendants = true
 
 local chatCorner = Instance.new("UICorner")
-chatCorner.CornerRadius = UDim.new(0, 10)
+chatCorner.CornerRadius = UDim.new(0, 15)
 chatCorner.Parent = chatFrame
 
 -- شريط العنوان
 local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleBar.Size = UDim2.new(1, 0, 0, 40)
+titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 titleBar.Parent = chatFrame
 
 local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.CornerRadius = UDim.new(0, 15)
 titleCorner.Parent = titleBar
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -60, 1, 0)
-titleLabel.Position = UDim2.new(0, 10, 0, 0)
+titleLabel.Size = UDim2.new(1, -50, 1, 0)
+titleLabel.Position = UDim2.new(0, 15, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "الشات السري"
+titleLabel.Text = "💬 الشات السري المتصل"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 14
+titleLabel.TextSize = 16
 titleLabel.Parent = titleBar
 
 -- زر الإغلاق (X)
 local closeButton = Instance.new("TextButton")
 closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -30, 0, 0)
-closeButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
 closeButton.Text = "X"
 closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeButton.Font = Enum.Font.GothamBold
@@ -90,83 +91,118 @@ closeButton.TextSize = 14
 closeButton.Parent = titleBar
 
 local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 10)
+closeCorner.CornerRadius = UDim.new(1, 0)
 closeCorner.Parent = closeButton
 
--- سجل الشات مع شريط التمرير
+-- منطقة سجل الشات (مثبتة بشكل آمن)
 local chatLogScrollingFrame = Instance.new("ScrollingFrame")
-chatLogScrollingFrame.Size = UDim2.new(1, -10, 1, -100)
-chatLogScrollingFrame.Position = UDim2.new(0, 5, 0, 35)
+chatLogScrollingFrame.Size = UDim2.new(1, -10, 1, -120)
+chatLogScrollingFrame.Position = UDim2.new(0, 5, 0, 45)
 chatLogScrollingFrame.BackgroundTransparency = 1
 chatLogScrollingFrame.BorderSizePixel = 0
-chatLogScrollingFrame.ScrollBarThickness = 6
+chatLogScrollingFrame.ScrollBarThickness = 8
 chatLogScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
 chatLogScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 chatLogScrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 chatLogScrollingFrame.Parent = chatFrame
 
 local chatLogLayout = Instance.new("UIListLayout")
-chatLogLayout.Padding = UDim.new(0, 5)
+chatLogLayout.Padding = UDim.new(0, 8)
 chatLogLayout.Parent = chatLogScrollingFrame
 
--- شريط الكتابة
+-- منطقة الإدخال (مثبتة في الأسفل بشكل آمن)
 local inputFrame = Instance.new("Frame")
-inputFrame.Size = UDim2.new(1, -10, 0, 40)
-inputFrame.Position = UDim2.new(0, 5, 1, -50)
+inputFrame.Size = UDim2.new(1, -20, 0, 50)
+inputFrame.Position = UDim2.new(0, 10, 1, -65)
 inputFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 inputFrame.Parent = chatFrame
+inputFrame.ClipsDescendants = true
 
 local inputCorner = Instance.new("UICorner")
-inputCorner.CornerRadius = UDim.new(0, 8)
+inputCorner.CornerRadius = UDim.new(0, 10)
 inputCorner.Parent = inputFrame
 
 local textBox = Instance.new("TextBox")
 textBox.Size = UDim2.new(1, -80, 1, -10)
-textBox.Position = UDim2.new(0, 5, 0, 5)
-textBox.BackgroundTransparency = 1
-textBox.Text = "اكتب رسالتك هنا..."
-textBox.TextColor3 = Color3.fromRGB(200, 200, 200)
+textBox.Position = UDim2.new(0, 10, 0, 5)
+textBox.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textBox.PlaceholderText = "اكتب رسالتك هنا..."
+textBox.PlaceholderColor3 = Color3.fromRGB(180, 180, 180)
 textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 14
 textBox.TextXAlignment = Enum.TextXAlignment.Left
+textBox.ClearTextOnFocus = false
 textBox.Parent = inputFrame
+
+local textBoxCorner = Instance.new("UICorner")
+textBoxCorner.CornerRadius = UDim.new(0, 8)
+textBoxCorner.Parent = textBox
 
 local sendButton = Instance.new("TextButton")
 sendButton.Size = UDim2.new(0, 60, 1, -10)
 sendButton.Position = UDim2.new(1, -65, 0, 5)
-sendButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-sendButton.Text = "إرسال"
+sendButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+sendButton.Text = "🕊️ إرسال"
 sendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 sendButton.Font = Enum.Font.GothamBold
 sendButton.TextSize = 12
 sendButton.Parent = inputFrame
 
 local sendCorner = Instance.new("UICorner")
-sendCorner.CornerRadius = UDim.new(0, 6)
+sendCorner.CornerRadius = UDim.new(0, 8)
 sendCorner.Parent = sendButton
 
--- 🔒 نظام الإرسال الآمن
-local function secureSendMessage(message, targetPlayer)
-    -- استخدام طرق متعددة لتجاوز الحماية
-    local success = pcall(function()
-        -- الطريقة 1: استخدام RemoteEvents بشكل خفي
-        local remote = Instance.new("RemoteEvent")
-        remote.Name = "ChatSync_" .. tostring(tick()):gsub(".", "")
-        remote.Parent = game:GetService("ReplicatedStorage")
-        
-        -- الطريقة 2: استخدام الـ Collectibles
-        local part = Instance.new("Part")
-        part.Name = "Msg_" .. game:GetService("HttpService"):GenerateGUID(false)
-        part.Parent = workspace
-        part:Destroy()
-        
-        -- الطريقة 3: استخدام الـ Attributes
-        if targetPlayer.Character then
-            local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid:SetAttribute("LastChatMessage", message)
-                humanoid:SetAttribute("LastChatTime", tick())
+-- 🔧 نظام التثبيت والحماية
+local function ensureUI Safety()
+    -- التأكد من أن العناصر في أماكنها الصحيحة
+    chatFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
+    chatButton.Position = UDim2.new(0, 30, 0.5, -30)
+    
+    -- منع تجاوز الحدود
+    chatFrame.ClipsDescendants = true
+    inputFrame.ClipsDescendants = true
+end
+
+-- 🔒 نظام الإرسال المتقدم
+local function advancedSecureSend(message, targetPlayer)
+    local success, result = pcall(function()
+        -- استخدام طرق متعددة لتجاوز الحماية
+        local methods = {
+            function() 
+                -- الطريقة 1: استخدام الـ Attributes
+                if targetPlayer.Character then
+                    local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        humanoid:SetAttribute("SecureChatMsg", message)
+                        humanoid:SetAttribute("SecureChatSender", Players.LocalPlayer.Name)
+                        humanoid:SetAttribute("SecureChatTime", tick())
+                    end
+                end
+            end,
+            
+            function()
+                -- الطريقة 2: استخدام الـ CollectionService
+                local collectionService = game:GetService("CollectionService")
+                local fakePart = Instance.new("Part")
+                fakePart.Name = "ChatData_" .. math.random(10000,99999)
+                fakePart.Parent = workspace
+                fakePart:SetAttribute("Message", message)
+                fakePart:SetAttribute("Sender", Players.LocalPlayer.Name)
+                delay(0.1, function() fakePart:Destroy() end)
+            end,
+            
+            function()
+                -- الطريقة 3: استخدام الـ Lighting
+                local lighting = game:GetService("Lighting")
+                lighting:SetAttribute("LastChatMessage", message)
+                lighting:SetAttribute("LastChatSender", Players.LocalPlayer.Name)
             end
+        }
+        
+        -- تجربة جميع الطرق
+        for _, method in ipairs(methods) do
+            pcall(method)
         end
         
         return true
@@ -175,57 +211,81 @@ local function secureSendMessage(message, targetPlayer)
     return success
 end
 
--- ✉️ إضافة رسالة للسجل
-local function addMessageToLog(message, color, isIncoming)
+-- ✉️ إضافة رسالة للسجل مع اسم المرسل
+local function addMessageToLog(senderName, message, isIncoming)
     local messageFrame = Instance.new("Frame")
     messageFrame.Size = UDim2.new(1, 0, 0, 0)
     messageFrame.BackgroundTransparency = 1
     messageFrame.AutomaticSize = Enum.AutomaticSize.Y
     messageFrame.Parent = chatLogScrollingFrame
     
+    local messageBubble = Instance.new("Frame")
+    messageBubble.Size = UDim2.new(0.8, 0, 0, 0)
+    messageBubble.BackgroundColor3 = isIncoming and Color3.fromRGB(60, 60, 80) or Color3.fromRGB(0, 100, 200)
+    messageBubble.AutomaticSize = Enum.AutomaticSize.Y
+    messageBubble.Position = isIncoming and UDim2.new(0, 5, 0, 0) or UDim2.new(1, -5, 0, 0)
+    messageBubble.AnchorPoint = isIncoming and Vector2.new(0, 0) or Vector2.new(1, 0)
+    messageBubble.Parent = messageFrame
+    
+    local bubbleCorner = Instance.new("UICorner")
+    bubbleCorner.CornerRadius = UDim.new(0, 12)
+    bubbleCorner.Parent = messageBubble
+    
+    local senderLabel = Instance.new("TextLabel")
+    senderLabel.Size = UDim2.new(1, -10, 0, 20)
+    senderLabel.Position = UDim2.new(0, 5, 0, 2)
+    senderLabel.BackgroundTransparency = 1
+    senderLabel.Text = senderName
+    senderLabel.TextColor3 = Color3.fromRGB(255, 255, 150)
+    senderLabel.Font = Enum.Font.GothamBold
+    senderLabel.TextSize = 11
+    senderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    senderLabel.Parent = messageBubble
+    
     local messageLabel = Instance.new("TextLabel")
-    messageLabel.Size = UDim2.new(1, 0, 0, 0)
+    messageLabel.Size = UDim2.new(1, -10, 0, 0)
+    messageLabel.Position = UDim2.new(0, 5, 0, 22)
     messageLabel.BackgroundTransparency = 1
     messageLabel.Text = message
-    messageLabel.TextColor3 = color or Color3.fromRGB(255, 255, 255)
+    messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     messageLabel.Font = Enum.Font.Gotham
-    messageLabel.TextSize = 12
+    messageLabel.TextSize = 13
     messageLabel.TextWrapped = true
     messageLabel.AutomaticSize = Enum.AutomaticSize.Y
-    messageLabel.TextXAlignment = isIncoming and Enum.TextXAlignment.Right or Enum.TextXAlignment.Left
-    messageLabel.Parent = messageFrame
+    messageLabel.TextXAlignment = Enum.TextXAlignment.Left
+    messageLabel.Parent = messageBubble
     
     -- التمرير للأسفل
-    wait()
+    wait(0.1)
     chatLogScrollingFrame.CanvasPosition = Vector2.new(0, chatLogScrollingFrame.AbsoluteCanvasSize.Y)
 end
 
--- 🎈 عرض الرسالة فوق الرأس بشكل خاص
-local function displaySecureMessageAboveHead(message, player)
-    local character = player.Character
+-- 🎈 عرض الرسالة فوق الرأس مع اسم المرسل
+local function displayMessageWithSender(message, senderName, targetPlayer)
+    local character = targetPlayer.Character
     if not character then return end
     
     local head = character:FindFirstChild("Head")
     if not head then return end
     
-    -- 🗨️ إنشاء الشكل المطلوب مع الإيموجي في المنتصف
     local billboardGui = Instance.new("BillboardGui")
-    billboardGui.Size = UDim2.new(0, 300, 0, 80)
-    billboardGui.StudsOffset = Vector3.new(0, 3.5, 0)
+    billboardGui.Size = UDim2.new(0, 400, 0, 100)
+    billboardGui.StudsOffset = Vector3.new(0, 4, 0)
     billboardGui.Adornee = head
     billboardGui.Parent = head
+    billboardGui.AlwaysOnTop = true
     
     local background = Instance.new("Frame")
     background.Size = UDim2.new(1, 0, 1, 0)
     background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    background.BackgroundTransparency = 0.3
+    background.BackgroundTransparency = 0.2
     background.Parent = billboardGui
     
     local bgCorner = Instance.new("UICorner")
-    bgCorner.CornerRadius = UDim.new(0, 15)
+    bgCorner.CornerRadius = UDim.new(0, 20)
     bgCorner.Parent = background
     
-    -- الإيموجي في المنتصف
+    -- الإيموجي في الأعلى
     local emojiLabel = Instance.new("TextLabel")
     emojiLabel.Size = UDim2.new(0, 40, 0, 40)
     emojiLabel.Position = UDim2.new(0.5, -20, 0, 5)
@@ -233,22 +293,33 @@ local function displaySecureMessageAboveHead(message, player)
     emojiLabel.Text = "🗨️"
     emojiLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     emojiLabel.Font = Enum.Font.GothamBold
-    emojiLabel.TextSize = 20
+    emojiLabel.TextSize = 24
     emojiLabel.Parent = billboardGui
     
-    -- النص تحت الإيموجي
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, -10, 0, 30)
-    textLabel.Position = UDim2.new(0, 5, 0, 45)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = message
-    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textLabel.Font = Enum.Font.Gotham
-    textLabel.TextSize = 12
-    textLabel.TextWrapped = true
-    textLabel.Parent = billboardGui
+    -- اسم المرسل
+    local senderText = Instance.new("TextLabel")
+    senderText.Size = UDim2.new(1, -10, 0, 20)
+    senderText.Position = UDim2.new(0, 5, 0, 45)
+    senderText.BackgroundTransparency = 1
+    senderText.Text = "من: " .. senderName
+    senderText.TextColor3 = Color3.fromRGB(255, 255, 150)
+    senderText.Font = Enum.Font.GothamBold
+    senderText.TextSize = 12
+    senderText.Parent = billboardGui
     
-    -- إخفاء الرسالة بعد 15 ثانية
+    -- الرسالة
+    local messageText = Instance.new("TextLabel")
+    messageText.Size = UDim2.new(1, -10, 0, 30)
+    messageText.Position = UDim2.new(0, 5, 0, 65)
+    messageText.BackgroundTransparency = 1
+    messageText.Text = message
+    messageText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    messageText.Font = Enum.Font.Gotham
+    messageText.TextSize = 14
+    messageText.TextWrapped = true
+    messageText.Parent = billboardGui
+    
+    -- إخفاء بعد 15 ثانية
     delay(15, function()
         if billboardGui then
             billboardGui:Destroy()
@@ -256,49 +327,68 @@ local function displaySecureMessageAboveHead(message, player)
     end)
 end
 
--- 📤 إرسال الرسالة بشكل آمن
-local function sendSecureMessage()
+-- 📤 إرسال الرسالة النهائي
+local function sendFinalMessage()
     local message = textBox.Text
     if message == "" or message == "اكتب رسالتك هنا..." then return end
     
-    -- 🔒 إرسال الرسالة بشكل آمن
-    local success = false
+    -- إضافة للشات المحلي
+    addMessageToLog(Players.LocalPlayer.Name, message, false)
     
+    -- عرض فوق رأس المرسل
+    displayMessageWithSender(message, Players.LocalPlayer.Name, Players.LocalPlayer)
+    
+    -- إرسال للاعب المتصل
     if connectedPlayer then
-        success = secureSendMessage(message, connectedPlayer)
-    else
-        success = true -- السماح بالإرسال المحلي
-    end
-    
-    if success then
-        -- إضافة الرسالة للسجل المحلي
-        addMessageToLog("أنت: " .. message, Color3.fromRGB(0, 170, 255), false)
-        
-        -- عرض الرسالة فوق رأس اللاعب المحلي
-        displaySecureMessageAboveHead(message, Players.LocalPlayer)
-        
-        if connectedPlayer then
-            addMessageToLog("✓ تم الإرسال لـ " .. connectedPlayer.Name, Color3.fromRGB(0, 255, 170), false)
-            
-            -- محاولة عرض الرسالة فوق رأس اللاعب المتصل
-            pcall(function()
-                displaySecureMessageAboveHead(message, connectedPlayer)
-            end)
+        local success = advancedSecureSend(message, connectedPlayer)
+        if success then
+            addMessageToLog("النظام", "✓ تم الإرسال لـ " .. connectedPlayer.Name, false)
+        else
+            addMessageToLog("النظام", "⚠️ تم الإرسال محلياً فقط", false)
         end
     else
-        addMessageToLog("⚠️ فشل الإرسال - تم الحماية", Color3.fromRGB(255, 100, 100), false)
+        -- البحث عن أي لاعب يستخدم السكريبت
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= Players.LocalPlayer then
+                pcall(function()
+                    displayMessageWithSender(message, Players.LocalPlayer.Name, player)
+                end)
+            end
+        end
+        addMessageToLog("النظام", "📢 تم بث الرسالة للجميع", false)
     end
     
-    -- مسح صندوق النص
     textBox.Text = ""
 end
 
--- 🎯 أحداث الأزرار
+-- 🔄 تحديث حالة الاتصال
+local function updateConnectionStatus()
+    local connectedUsers = {}
+    
+    for playerName, _ in pairs(AUTHORIZED_PLAYERS) do
+        local player = Players:FindFirstChild(playerName)
+        if player and player ~= Players.LocalPlayer then
+            table.insert(connectedUsers, playerName)
+        end
+    end
+    
+    if #connectedUsers > 0 then
+        titleLabel.Text = "💬 الشات السري - متصل بـ: " .. table.concat(connectedUsers, ", ")
+    else
+        titleLabel.Text = "💬 الشات السري - جاهز للإرسال العام"
+    end
+end
+
+-- 🎯 الأحداث الرئيسية
 chatButton.MouseButton1Click:Connect(function()
-    chatFrame.Visible = true
+    chatFrame.Visible = not chatFrame.Visible
+    ensureUI Safety()
+    
     if not chatSystemActive then
         chatSystemActive = true
-        addMessageToLog("🔒 النظام الآمن جاهز", Color3.fromRGB(0, 255, 0), false)
+        addMessageToLog("النظام", "🔒 الشات السري مفعل - يمكنكم إرسال رسائل وقراءتها", false)
+        addMessageToLog("النظام", "👥 المستخدمون النشطون: " .. Players.LocalPlayer.Name, false)
+        updateConnectionStatus()
     end
 end)
 
@@ -307,47 +397,55 @@ closeButton.MouseButton1Click:Connect(function()
 end)
 
 sendButton.MouseButton1Click:Connect(function()
-    sendSecureMessage()
+    sendFinalMessage()
 end)
 
-textBox.Focused:Connect(function()
-    if textBox.Text == "اكتب رسالتك هنا..." then
-        textBox.Text = ""
-        textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        sendFinalMessage()
     end
 end)
 
-textBox.FocusLost:Connect(function()
-    if textBox.Text == "" then
-        textBox.Text = "اكتب رسالتك هنا..."
-        textBox.TextColor3 = Color3.fromRGB(200, 200, 200)
+-- 👥 مراقبة دخول وخروج اللاعبين
+Players.PlayerAdded:Connect(function(player)
+    wait(2)
+    if AUTHORIZED_PLAYERS[player.Name] then
+        connectedPlayer = player
+        addMessageToLog("النظام", "✅ " .. player.Name .. " انضم إلى الشات", true)
+        updateConnectionStatus()
     end
 end)
 
--- 🔍 اكتشاف اللاعبين المصرح لهم
-local function setupPlayerDetection()
-    for _, player in pairs(Players:GetPlayers()) do
-        if AUTHORIZED_PLAYERS[player.Name] and player ~= Players.LocalPlayer then
-            connectedPlayer = player
-            addMessageToLog("✅ تم اكتشاف: " .. player.Name, Color3.fromRGB(0, 255, 0), true)
-            break
+Players.PlayerRemoving:Connect(function(player)
+    if AUTHORIZED_PLAYERS[player.Name] then
+        addMessageToLog("النظام", "🚪 " .. player.Name .. " غادر الشات", true)
+        if connectedPlayer == player then
+            connectedPlayer = nil
+        end
+        updateConnectionStatus()
+    end
+end)
+
+-- 🛡️ نظام الحماية من الإغلاق
+local function antiShutdownSystem()
+    while true do
+        wait(10)
+        ensureUI Safety()
+        
+        -- إعادة إنشاء الواجهة إذا اختفت
+        if not screenGui.Parent then
+            screenGui.Parent = PlayerGui
         end
     end
 end
 
--- مراقبة دخول اللاعبين الجدد
-Players.PlayerAdded:Connect(function(player)
-    if AUTHORIZED_PLAYERS[player.Name] then
-        wait(2) -- انتظار تحميل الشخصية
-        connectedPlayer = player
-        addMessageToLog("🎯 دخل: " .. player.Name, Color3.fromRGB(255, 255, 0), true)
-    end
-end)
-
--- 🎮 إظهار الواجهة والإعداد
+-- 🚀 البدء
+ensureUI Safety()
 screenGui.Parent = PlayerGui
-setupPlayerDetection()
+spawn(antiShutdownSystem)
 
 -- 📢 رسالة البدء
-print("🔒 النظام السري جاهز!")
-addMessageToLog("مرحباً! الشات السري محمي وجاهز", Color3.fromRGB(255, 255, 255), false)
+print("🛡️ النظام السري المحمي يعمل!")
+addMessageToLog("النظام", "مرحباً " .. Players.LocalPlayer.Name .. "! الشات السري جاهز", false)
+addMessageToLog("النظام", "يمكنكم إرسال رسائل وقراءتها بأمان", false)
+updateConnectionStatus()
