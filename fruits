@@ -1,0 +1,167 @@
+-- Buddha Tool - Maintenance Notification
+-- By: [Your Name]
+
+local Players = game:GetService("Players")
+local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+local TweenService = game:GetService("TweenService")
+
+-- إنشاء الأداة
+local tool = Instance.new("Tool")
+tool.Name = "Buddha"
+tool.ToolTip = "Buddha - Under Maintenance"
+tool.TextureId = "rbxassetid://11337649779"
+tool.CanBeDropped = false
+tool.RequiresHandle = false
+
+-- إنشاء إشعار الصيانة
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "BuddhaMaintenance"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 400, 0, 200)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+mainFrame.BackgroundTransparency = 0.1
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 20)
+mainCorner.Parent = mainFrame
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(255, 215, 0)
+mainStroke.Thickness = 3
+mainStroke.Parent = mainFrame
+
+-- رمز الصيانة
+local iconFrame = Instance.new("Frame")
+iconFrame.Size = UDim2.new(0, 80, 0, 80)
+iconFrame.Position = UDim2.new(0.5, -40, 0, 20)
+iconFrame.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+iconFrame.BorderSizePixel = 0
+iconFrame.Parent = mainFrame
+
+local iconCorner = Instance.new("UICorner")
+iconCorner.CornerRadius = UDim.new(1, 0)
+iconCorner.Parent = iconFrame
+
+local iconLabel = Instance.new("TextLabel")
+iconLabel.Size = UDim2.new(1, 0, 1, 0)
+iconLabel.BackgroundTransparency = 1
+iconLabel.Text = "⚒️"
+iconLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+iconLabel.Font = Enum.Font.GothamBlack
+iconLabel.TextSize = 40
+iconLabel.Parent = iconFrame
+
+-- نص الصيانة
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -40, 0, 40)
+titleLabel.Position = UDim2.new(0, 20, 0, 110)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "تحت الصيانة"
+titleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+titleLabel.Font = Enum.Font.GothamBlack
+titleLabel.TextSize = 28
+titleLabel.TextStrokeTransparency = 0
+titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+titleLabel.Parent = mainFrame
+
+local subtitleLabel = Instance.new("TextLabel")
+subtitleLabel.Size = UDim2.new(1, -40, 0, 30)
+subtitleLabel.Position = UDim2.new(0, 20, 0, 150)
+subtitleLabel.BackgroundTransparency = 1
+subtitleLabel.Text = "Buddha - قيد التطوير"
+subtitleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+subtitleLabel.Font = Enum.Font.Gotham
+subtitleLabel.TextSize = 16
+subtitleLabel.Parent = mainFrame
+
+-- زر الإغلاق
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 120, 0, 35)
+closeButton.Position = UDim2.new(0.5, -60, 1, -45)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+closeButton.Text = "إغلاق"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextSize = 14
+closeButton.Parent = mainFrame
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 10)
+closeCorner.Parent = closeButton
+
+-- 🎯 عرض إشعار الصيانة
+local function showMaintenanceNotification()
+    mainFrame.Visible = true
+    
+    -- تأثير الظهور
+    mainFrame.Position = UDim2.new(0.5, -200, 0.5, 300)
+    mainFrame.BackgroundTransparency = 1
+    
+    TweenService:Create(mainFrame, TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, -200, 0.5, -100),
+        BackgroundTransparency = 0.1
+    }):Play()
+    
+    -- تأثير توهج الذهب
+    spawn(function()
+        while mainFrame.Visible do
+            TweenService:Create(mainStroke, TweenInfo.new(1.5), {
+                Color = Color3.fromRGB(255, 255, 100)
+            }):Play()
+            wait(1.5)
+            TweenService:Create(mainStroke, TweenInfo.new(1.5), {
+                Color = Color3.fromRGB(255, 215, 0)
+            }):Play()
+            wait(1.5)
+        end
+    end)
+end
+
+-- 🎯 إخفاء الإشعار
+local function hideMaintenanceNotification()
+    TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Position = UDim2.new(0.5, -200, 0.5, 300),
+        BackgroundTransparency = 1
+    }):Play()
+    
+    wait(0.5)
+    mainFrame.Visible = false
+end
+
+-- 🎮 أحداث الأداة
+tool.Activated:Connect(function()
+    showMaintenanceNotification()
+end)
+
+tool.Equipped:Connect(function()
+    screenGui.Parent = PlayerGui
+    print("🛠️ Buddha tool equipped - Under Maintenance")
+end)
+
+-- 🎯 حدث زر الإغلاق
+closeButton.MouseButton1Click:Connect(function()
+    hideMaintenanceNotification()
+end)
+
+-- 🎯 إغلاق بالإكس أيضًا
+UserInputService = game:GetService("UserInputService")
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.X and mainFrame.Visible then
+        hideMaintenanceNotification()
+    end
+end)
+
+-- 🚀 إضافة الأداة للاعب
+tool.Parent = Players.LocalPlayer.Backpack
+
+print("🛠️ Buddha tool script loaded successfully!")
+print("⚒️ Tool is under maintenance - Shows notification when clicked")
