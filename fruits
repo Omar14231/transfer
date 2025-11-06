@@ -1,16 +1,14 @@
--- Buddha Tool - Size & Light Power
+-- Buddha Tool - Giant Yellow Mode
 -- By: [Your Name]
 
 local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 
 -- إنشاء الأداة
 local tool = Instance.new("Tool")
 tool.Name = "Buddha"
-tool.ToolTip = "Buddha - Size & Light Power"
+tool.ToolTip = "Buddha - Giant Yellow Mode"
 tool.TextureId = "rbxassetid://11337649779"
 tool.CanBeDropped = false
 tool.RequiresHandle = false
@@ -20,58 +18,44 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local isBigSize = false
-local originalSize = Vector3.new(1, 1, 1)
+local originalColors = {}
 local originalWalkSpeed = 16
-local lights = {}
 
--- 🎯 تفعيل وضع Buddha الكبير
-local function activateBuddhaMode()
+-- 🎯 تفعيل الوضع العملاق الأصفر
+local function activateGiantYellowMode()
     if isBigSize then return end
     
     isBigSize = true
-    print("🟡 تفعيل وضع Buddha الكبير")
+    print("🟡 تفعيل الوضع العملاق الأصفر")
     
-    -- حفظ الأحجام الأصلية
-    originalSize = character:GetScale()
-    originalWalkSpeed = humanoid.WalkSpeed
-    
-    -- تكبير الشخصية
-    character:SetScale(Vector3.new(3, 3, 3)) -- 3 أضعاف الحجم الطبيعي
-    
-    -- زيادة سرعة المشي
-    humanoid.WalkSpeed = 30
-    
-    -- إضافة أضواء صفراء لجميع الأطراف
+    -- حفظ الألوان الأصلية
     for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-            local light = Instance.new("PointLight")
-            light.Name = "BuddhaLight"
-            light.Brightness = 5
-            light.Color = Color3.fromRGB(255, 255, 0) -- أصفر
-            light.Range = 15
-            light.Shadows = true
-            light.Parent = part
-            table.insert(lights, light)
+        if part:IsA("BasePart") then
+            originalColors[part] = part.BrickColor
         end
     end
     
-    -- إضافة ضوء قوي للرأس
-    local head = character:FindFirstChild("Head")
-    if head then
-        local headLight = Instance.new("PointLight")
-        headLight.Name = "BuddhaHeadLight"
-        headLight.Brightness = 10
-        headLight.Color = Color3.fromRGB(255, 255, 100) -- أصفر فاتح
-        headLight.Range = 25
-        headLight.Shadows = true
-        headLight.Parent = head
-        table.insert(lights, headLight)
+    -- حفظ سرعة المشي الأصلية
+    originalWalkSpeed = humanoid.WalkSpeed
+    
+    -- ⭐ التكبير إلى حجم عملاق
+    character:SetScale(Vector3.new(5, 5, 5)) -- 5 أضعاف الحجم الطبيعي
+    
+    -- ⭐ جعل اللون أصفر لامع
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.BrickColor = BrickColor.new("Bright yellow")
+            part.Material = Enum.Material.Neon -- جعلها مضيئة
+        end
     end
     
-    -- تأثير اهتزاز الأرض
+    -- ⭐ زيادة سرعة المشي
+    humanoid.WalkSpeed = 25
+    
+    -- ⭐ تأثيرات بصرية
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if rootPart then
-        -- تأثير صوتي
+        -- تأثير صوتي للتكبير
         local sound = Instance.new("Sound")
         sound.SoundId = "rbxassetid://9111278363"
         sound.Volume = 1.0
@@ -81,130 +65,98 @@ local function activateBuddhaMode()
         
         -- تأثير اهتزاز
         spawn(function()
-            for i = 1, 10 do
-                rootPart.CFrame = rootPart.CFrame * CFrame.new(0, 0.1, 0)
-                wait(0.05)
-                rootPart.CFrame = rootPart.CFrame * CFrame.new(0, -0.1, 0)
-                wait(0.05)
+            for i = 1, 15 do
+                rootPart.CFrame = rootPart.CFrame * CFrame.new(0, 0.2, 0)
+                wait(0.03)
+                rootPart.CFrame = rootPart.CFrame * CFrame.new(0, -0.2, 0)
+                wait(0.03)
             end
         end)
+        
+        -- إضافة توهج أصفر قوي
+        local glow = Instance.new("PointLight")
+        glow.Name = "BuddhaGlow"
+        glow.Brightness = 15
+        glow.Color = Color3.fromRGB(255, 255, 0) -- أصفر ساطع
+        glow.Range = 30
+        glow.Shadows = true
+        glow.Parent = rootPart
+    end
+    
+    -- ⭐ جعل جميع الأجزاء مضيئة
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            local partGlow = Instance.new("PointLight")
+            partGlow.Name = "PartGlow"
+            partGlow.Brightness = 8
+            partGlow.Color = Color3.fromRGB(255, 255, 100) -- أصفر فاتح
+            partGlow.Range = 15
+            partGlow.Parent = part
+        end
     end
 end
 
--- 🎯 تعطيل وضع Buddha والعودة للحجم الطبيعي
-local function deactivateBuddhaMode()
+-- 🎯 العودة للحالة الطبيعية
+local function deactivateGiantMode()
     if not isBigSize then return end
     
     isBigSize = false
-    print("🔵 تعطيل وضع Buddha - العودة للحجم الطبيعي")
+    print("🔵 العودة للحالة الطبيعية")
     
-    -- إرجاع الحجم الطبيعي
-    character:SetScale(originalSize)
+    -- ⭐ إرجاع الحجم الطبيعي
+    character:SetScale(Vector3.new(1, 1, 1))
     
-    -- إرجاع سرعة المشي الطبيعية
+    -- ⭐ إرجاع الألوان الأصلية
+    for part, originalColor in pairs(originalColors) do
+        if part and part.Parent then
+            part.BrickColor = originalColor
+            part.Material = Enum.Material.Plastic -- إرجاع المادة الأصلية
+        end
+    end
+    
+    -- ⭐ إرجاع سرعة المشي
     humanoid.WalkSpeed = originalWalkSpeed
     
-    -- إزالة جميع الأضواء
-    for _, light in pairs(lights) do
-        if light and light.Parent then
-            light:Destroy()
-        end
-    end
-    lights = {}
-    
-    -- تنظيف أي أضواء متبقية
+    -- ⭐ إزالة التوهج
     for _, part in pairs(character:GetChildren()) do
         if part:IsA("BasePart") then
-            local remainingLight = part:FindFirstChild("BuddhaLight")
-            if remainingLight then
-                remainingLight:Destroy()
+            local glow = part:FindFirstChild("BuddhaGlow")
+            if glow then
+                glow:Destroy()
             end
-            local headLight = part:FindFirstChild("BuddhaHeadLight")
-            if headLight then
-                headLight:Destroy()
+            local partGlow = part:FindFirstChild("PartGlow")
+            if partGlow then
+                partGlow:Destroy()
             end
         end
     end
+    
+    -- تنظيف
+    originalColors = {}
 end
 
--- 🎯 نظام الضرب عند النقر على الشاشة
-local function setupScreenPunch()
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        
-        -- النقر على الشاشة (ليس الأداة)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch then
-            
-            if isBigSize then
-                -- تأثير الضرب
-                local rootPart = character:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    -- إنشاء تأثير موجة صدمة
-                    local shockwave = Instance.new("Part")
-                    shockwave.Name = "BuddhaPunch"
-                    shockwave.Size = Vector3.new(10, 10, 10)
-                    shockwave.Position = rootPart.Position + rootPart.CFrame.LookVector * 10
-                    shockwave.Anchored = true
-                    shockwave.CanCollide = false
-                    shockwave.Material = Enum.Material.Neon
-                    shockwave.BrickColor = BrickColor.new("Bright yellow")
-                    shockwave.Transparency = 0.3
-                    shockwave.Parent = workspace
-                    
-                    -- تأثير توهج
-                    local shockwaveLight = Instance.new("PointLight")
-                    shockwaveLight.Brightness = 20
-                    shockwaveLight.Color = Color3.fromRGB(255, 255, 0)
-                    shockwaveLight.Range = 15
-                    shockwaveLight.Parent = shockwave
-                    
-                    -- صوت الضرب
-                    local punchSound = Instance.new("Sound")
-                    punchSound.SoundId = "rbxassetid://2785498977"
-                    punchSound.Volume = 0.8
-                    punchSound.Parent = shockwave
-                    punchSound:Play()
-                    
-                    -- تأثير الاختفاء
-                    spawn(function()
-                        for i = 1, 10 do
-                            shockwave.Size = shockwave.Size + Vector3.new(2, 2, 2)
-                            shockwave.Transparency = shockwave.Transparency + 0.07
-                            wait(0.05)
-                        end
-                        shockwave:Destroy()
-                    end)
-                    
-                    print("👊 Buddha ضربة قوية!")
-                end
-            end
-        end
-    end)
-end
-
--- 🎯 تبديل وضع Buddha
-local function toggleBuddhaMode()
+-- 🎯 تبديل الوضع
+local function toggleGiantMode()
     if isBigSize then
-        deactivateBuddhaMode()
+        deactivateGiantMode()
     else
-        activateBuddhaMode()
+        activateGiantYellowMode()
     end
 end
 
 -- 🎮 أحداث الأداة
 tool.Activated:Connect(function()
-    toggleBuddhaMode()
+    toggleGiantMode()
 end)
 
 tool.Equipped:Connect(function()
-    print("🟡 Buddha tool equipped - Click to toggle size")
+    print("🟡 Buddha tool equipped - Click to become giant yellow")
 end)
 
 tool.Unequipped:Connect(function()
-    -- تعطيل الوضع تلقائياً عند ترك الأداة
+    -- العودة تلقائياً عند ترك الأداة
     if isBigSize then
-        deactivateBuddhaMode()
+        deactivateGiantMode()
     end
 end)
 
@@ -215,26 +167,23 @@ player.CharacterAdded:Connect(function(newCharacter)
     
     -- إعادة تعيين المتغيرات
     isBigSize = false
-    lights = {}
+    originalColors = {}
 end)
-
--- 🎯 إعداد نظام الضرب
-setupScreenPunch()
 
 -- 🚀 إضافة الأداة للاعب
 tool.Parent = Players.LocalPlayer.Backpack
 
--- 🔧 أوامر إضافية للتحكم
+-- 🔧 زر طوارئ للعودة
+local UserInputService = game:GetService("UserInputService")
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
-    -- زر R للعودة للحجم الطبيعي (طوارئ)
+    -- زر R للعودة الطارئة
     if input.KeyCode == Enum.KeyCode.R and isBigSize then
-        deactivateBuddhaMode()
+        deactivateGiantMode()
     end
 end)
 
-print("🟡 Buddha Size & Light tool loaded successfully!")
-print("🎮 Click the tool to toggle giant size")
-print("👊 Click screen to punch while in Buddha mode")
-print("🔴 Press R to emergency return to normal size")
+print("🟡 Buddha Giant Yellow tool loaded successfully!")
+print("🎮 Click the tool to become giant yellow")
+print("🔴 Press R to emergency return to normal")
