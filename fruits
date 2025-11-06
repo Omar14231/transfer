@@ -1,167 +1,240 @@
--- Buddha Tool - Maintenance Notification
+-- Buddha Tool - Size & Light Power
 -- By: [Your Name]
 
 local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 -- إنشاء الأداة
 local tool = Instance.new("Tool")
 tool.Name = "Buddha"
-tool.ToolTip = "Buddha - Under Maintenance"
+tool.ToolTip = "Buddha - Size & Light Power"
 tool.TextureId = "rbxassetid://11337649779"
 tool.CanBeDropped = false
 tool.RequiresHandle = false
 
--- إنشاء إشعار الصيانة
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "BuddhaMaintenance"
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- متغيرات النظام
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local isBigSize = false
+local originalSize = Vector3.new(1, 1, 1)
+local originalWalkSpeed = 16
+local lights = {}
 
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 400, 0, 200)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-mainFrame.BackgroundTransparency = 0.1
-mainFrame.BorderSizePixel = 0
-mainFrame.Visible = false
-mainFrame.Parent = screenGui
-
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 20)
-mainCorner.Parent = mainFrame
-
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = Color3.fromRGB(255, 215, 0)
-mainStroke.Thickness = 3
-mainStroke.Parent = mainFrame
-
--- رمز الصيانة
-local iconFrame = Instance.new("Frame")
-iconFrame.Size = UDim2.new(0, 80, 0, 80)
-iconFrame.Position = UDim2.new(0.5, -40, 0, 20)
-iconFrame.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-iconFrame.BorderSizePixel = 0
-iconFrame.Parent = mainFrame
-
-local iconCorner = Instance.new("UICorner")
-iconCorner.CornerRadius = UDim.new(1, 0)
-iconCorner.Parent = iconFrame
-
-local iconLabel = Instance.new("TextLabel")
-iconLabel.Size = UDim2.new(1, 0, 1, 0)
-iconLabel.BackgroundTransparency = 1
-iconLabel.Text = "⚒️"
-iconLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-iconLabel.Font = Enum.Font.GothamBlack
-iconLabel.TextSize = 40
-iconLabel.Parent = iconFrame
-
--- نص الصيانة
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -40, 0, 40)
-titleLabel.Position = UDim2.new(0, 20, 0, 110)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "تحت الصيانة"
-titleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
-titleLabel.Font = Enum.Font.GothamBlack
-titleLabel.TextSize = 28
-titleLabel.TextStrokeTransparency = 0
-titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-titleLabel.Parent = mainFrame
-
-local subtitleLabel = Instance.new("TextLabel")
-subtitleLabel.Size = UDim2.new(1, -40, 0, 30)
-subtitleLabel.Position = UDim2.new(0, 20, 0, 150)
-subtitleLabel.BackgroundTransparency = 1
-subtitleLabel.Text = "Buddha - قيد التطوير"
-subtitleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-subtitleLabel.Font = Enum.Font.Gotham
-subtitleLabel.TextSize = 16
-subtitleLabel.Parent = mainFrame
-
--- زر الإغلاق
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 120, 0, 35)
-closeButton.Position = UDim2.new(0.5, -60, 1, -45)
-closeButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-closeButton.Text = "إغلاق"
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.Font = Enum.Font.GothamBold
-closeButton.TextSize = 14
-closeButton.Parent = mainFrame
-
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 10)
-closeCorner.Parent = closeButton
-
--- 🎯 عرض إشعار الصيانة
-local function showMaintenanceNotification()
-    mainFrame.Visible = true
+-- 🎯 تفعيل وضع Buddha الكبير
+local function activateBuddhaMode()
+    if isBigSize then return end
     
-    -- تأثير الظهور
-    mainFrame.Position = UDim2.new(0.5, -200, 0.5, 300)
-    mainFrame.BackgroundTransparency = 1
+    isBigSize = true
+    print("🟡 تفعيل وضع Buddha الكبير")
     
-    TweenService:Create(mainFrame, TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, -200, 0.5, -100),
-        BackgroundTransparency = 0.1
-    }):Play()
+    -- حفظ الأحجام الأصلية
+    originalSize = character:GetScale()
+    originalWalkSpeed = humanoid.WalkSpeed
     
-    -- تأثير توهج الذهب
-    spawn(function()
-        while mainFrame.Visible do
-            TweenService:Create(mainStroke, TweenInfo.new(1.5), {
-                Color = Color3.fromRGB(255, 255, 100)
-            }):Play()
-            wait(1.5)
-            TweenService:Create(mainStroke, TweenInfo.new(1.5), {
-                Color = Color3.fromRGB(255, 215, 0)
-            }):Play()
-            wait(1.5)
+    -- تكبير الشخصية
+    character:SetScale(Vector3.new(3, 3, 3)) -- 3 أضعاف الحجم الطبيعي
+    
+    -- زيادة سرعة المشي
+    humanoid.WalkSpeed = 30
+    
+    -- إضافة أضواء صفراء لجميع الأطراف
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+            local light = Instance.new("PointLight")
+            light.Name = "BuddhaLight"
+            light.Brightness = 5
+            light.Color = Color3.fromRGB(255, 255, 0) -- أصفر
+            light.Range = 15
+            light.Shadows = true
+            light.Parent = part
+            table.insert(lights, light)
+        end
+    end
+    
+    -- إضافة ضوء قوي للرأس
+    local head = character:FindFirstChild("Head")
+    if head then
+        local headLight = Instance.new("PointLight")
+        headLight.Name = "BuddhaHeadLight"
+        headLight.Brightness = 10
+        headLight.Color = Color3.fromRGB(255, 255, 100) -- أصفر فاتح
+        headLight.Range = 25
+        headLight.Shadows = true
+        headLight.Parent = head
+        table.insert(lights, headLight)
+    end
+    
+    -- تأثير اهتزاز الأرض
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if rootPart then
+        -- تأثير صوتي
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://9111278363"
+        sound.Volume = 1.0
+        sound.Parent = rootPart
+        sound:Play()
+        game:GetService("Debris"):AddItem(sound, 3)
+        
+        -- تأثير اهتزاز
+        spawn(function()
+            for i = 1, 10 do
+                rootPart.CFrame = rootPart.CFrame * CFrame.new(0, 0.1, 0)
+                wait(0.05)
+                rootPart.CFrame = rootPart.CFrame * CFrame.new(0, -0.1, 0)
+                wait(0.05)
+            end
+        end)
+    end
+end
+
+-- 🎯 تعطيل وضع Buddha والعودة للحجم الطبيعي
+local function deactivateBuddhaMode()
+    if not isBigSize then return end
+    
+    isBigSize = false
+    print("🔵 تعطيل وضع Buddha - العودة للحجم الطبيعي")
+    
+    -- إرجاع الحجم الطبيعي
+    character:SetScale(originalSize)
+    
+    -- إرجاع سرعة المشي الطبيعية
+    humanoid.WalkSpeed = originalWalkSpeed
+    
+    -- إزالة جميع الأضواء
+    for _, light in pairs(lights) do
+        if light and light.Parent then
+            light:Destroy()
+        end
+    end
+    lights = {}
+    
+    -- تنظيف أي أضواء متبقية
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            local remainingLight = part:FindFirstChild("BuddhaLight")
+            if remainingLight then
+                remainingLight:Destroy()
+            end
+            local headLight = part:FindFirstChild("BuddhaHeadLight")
+            if headLight then
+                headLight:Destroy()
+            end
+        end
+    end
+end
+
+-- 🎯 نظام الضرب عند النقر على الشاشة
+local function setupScreenPunch()
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        
+        -- النقر على الشاشة (ليس الأداة)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
+            
+            if isBigSize then
+                -- تأثير الضرب
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    -- إنشاء تأثير موجة صدمة
+                    local shockwave = Instance.new("Part")
+                    shockwave.Name = "BuddhaPunch"
+                    shockwave.Size = Vector3.new(10, 10, 10)
+                    shockwave.Position = rootPart.Position + rootPart.CFrame.LookVector * 10
+                    shockwave.Anchored = true
+                    shockwave.CanCollide = false
+                    shockwave.Material = Enum.Material.Neon
+                    shockwave.BrickColor = BrickColor.new("Bright yellow")
+                    shockwave.Transparency = 0.3
+                    shockwave.Parent = workspace
+                    
+                    -- تأثير توهج
+                    local shockwaveLight = Instance.new("PointLight")
+                    shockwaveLight.Brightness = 20
+                    shockwaveLight.Color = Color3.fromRGB(255, 255, 0)
+                    shockwaveLight.Range = 15
+                    shockwaveLight.Parent = shockwave
+                    
+                    -- صوت الضرب
+                    local punchSound = Instance.new("Sound")
+                    punchSound.SoundId = "rbxassetid://2785498977"
+                    punchSound.Volume = 0.8
+                    punchSound.Parent = shockwave
+                    punchSound:Play()
+                    
+                    -- تأثير الاختفاء
+                    spawn(function()
+                        for i = 1, 10 do
+                            shockwave.Size = shockwave.Size + Vector3.new(2, 2, 2)
+                            shockwave.Transparency = shockwave.Transparency + 0.07
+                            wait(0.05)
+                        end
+                        shockwave:Destroy()
+                    end)
+                    
+                    print("👊 Buddha ضربة قوية!")
+                end
+            end
         end
     end)
 end
 
--- 🎯 إخفاء الإشعار
-local function hideMaintenanceNotification()
-    TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-        Position = UDim2.new(0.5, -200, 0.5, 300),
-        BackgroundTransparency = 1
-    }):Play()
-    
-    wait(0.5)
-    mainFrame.Visible = false
+-- 🎯 تبديل وضع Buddha
+local function toggleBuddhaMode()
+    if isBigSize then
+        deactivateBuddhaMode()
+    else
+        activateBuddhaMode()
+    end
 end
 
 -- 🎮 أحداث الأداة
 tool.Activated:Connect(function()
-    showMaintenanceNotification()
+    toggleBuddhaMode()
 end)
 
 tool.Equipped:Connect(function()
-    screenGui.Parent = PlayerGui
-    print("🛠️ Buddha tool equipped - Under Maintenance")
+    print("🟡 Buddha tool equipped - Click to toggle size")
 end)
 
--- 🎯 حدث زر الإغلاق
-closeButton.MouseButton1Click:Connect(function()
-    hideMaintenanceNotification()
-end)
-
--- 🎯 إغلاق بالإكس أيضًا
-UserInputService = game:GetService("UserInputService")
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    
-    if input.KeyCode == Enum.KeyCode.X and mainFrame.Visible then
-        hideMaintenanceNotification()
+tool.Unequipped:Connect(function()
+    -- تعطيل الوضع تلقائياً عند ترك الأداة
+    if isBigSize then
+        deactivateBuddhaMode()
     end
 end)
+
+-- 🔄 تحديث الشخصية عند الموت
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+    
+    -- إعادة تعيين المتغيرات
+    isBigSize = false
+    lights = {}
+end)
+
+-- 🎯 إعداد نظام الضرب
+setupScreenPunch()
 
 -- 🚀 إضافة الأداة للاعب
 tool.Parent = Players.LocalPlayer.Backpack
 
-print("🛠️ Buddha tool script loaded successfully!")
-print("⚒️ Tool is under maintenance - Shows notification when clicked")
+-- 🔧 أوامر إضافية للتحكم
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    -- زر R للعودة للحجم الطبيعي (طوارئ)
+    if input.KeyCode == Enum.KeyCode.R and isBigSize then
+        deactivateBuddhaMode()
+    end
+end)
+
+print("🟡 Buddha Size & Light tool loaded successfully!")
+print("🎮 Click the tool to toggle giant size")
+print("👊 Click screen to punch while in Buddha mode")
+print("🔴 Press R to emergency return to normal size")
