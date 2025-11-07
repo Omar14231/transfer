@@ -1,189 +1,418 @@
--- Buddha Tool - Giant Yellow Mode
--- By: [Your Name]
-
+-- Script for Dragon Tool
 local Players = game:GetService("Players")
-local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-local TweenService = game:GetService("TweenService")
-
--- إنشاء الأداة
-local tool = Instance.new("Tool")
-tool.Name = "Buddha"
-tool.ToolTip = "Buddha - Giant Yellow Mode"
-tool.TextureId = "rbxassetid://11337649779"
-tool.CanBeDropped = false
-tool.RequiresHandle = false
-
--- متغيرات النظام
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local isBigSize = false
-local originalColors = {}
-local originalWalkSpeed = 16
-
--- 🎯 تفعيل الوضع العملاق الأصفر
-local function activateGiantYellowMode()
-    if isBigSize then return end
-    
-    isBigSize = true
-    print("🟡 تفعيل الوضع العملاق الأصفر")
-    
-    -- حفظ الألوان الأصلية
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") then
-            originalColors[part] = part.BrickColor
-        end
-    end
-    
-    -- حفظ سرعة المشي الأصلية
-    originalWalkSpeed = humanoid.WalkSpeed
-    
-    -- ⭐ التكبير إلى حجم عملاق
-    character:SetScale(Vector3.new(5, 5, 5)) -- 5 أضعاف الحجم الطبيعي
-    
-    -- ⭐ جعل اللون أصفر لامع
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") then
-            part.BrickColor = BrickColor.new("Bright yellow")
-            part.Material = Enum.Material.Neon -- جعلها مضيئة
-        end
-    end
-    
-    -- ⭐ زيادة سرعة المشي
-    humanoid.WalkSpeed = 25
-    
-    -- ⭐ تأثيرات بصرية
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-    if rootPart then
-        -- تأثير صوتي للتكبير
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://9111278363"
-        sound.Volume = 1.0
-        sound.Parent = rootPart
-        sound:Play()
-        game:GetService("Debris"):AddItem(sound, 3)
-        
-        -- تأثير اهتزاز
-        spawn(function()
-            for i = 1, 15 do
-                rootPart.CFrame = rootPart.CFrame * CFrame.new(0, 0.2, 0)
-                wait(0.03)
-                rootPart.CFrame = rootPart.CFrame * CFrame.new(0, -0.2, 0)
-                wait(0.03)
-            end
-        end)
-        
-        -- إضافة توهج أصفر قوي
-        local glow = Instance.new("PointLight")
-        glow.Name = "BuddhaGlow"
-        glow.Brightness = 15
-        glow.Color = Color3.fromRGB(255, 255, 0) -- أصفر ساطع
-        glow.Range = 30
-        glow.Shadows = true
-        glow.Parent = rootPart
-    end
-    
-    -- ⭐ جعل جميع الأجزاء مضيئة
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") then
-            local partGlow = Instance.new("PointLight")
-            partGlow.Name = "PartGlow"
-            partGlow.Brightness = 8
-            partGlow.Color = Color3.fromRGB(255, 255, 100) -- أصفر فاتح
-            partGlow.Range = 15
-            partGlow.Parent = part
-        end
-    end
-end
-
--- 🎯 العودة للحالة الطبيعية
-local function deactivateGiantMode()
-    if not isBigSize then return end
-    
-    isBigSize = false
-    print("🔵 العودة للحالة الطبيعية")
-    
-    -- ⭐ إرجاع الحجم الطبيعي
-    character:SetScale(Vector3.new(1, 1, 1))
-    
-    -- ⭐ إرجاع الألوان الأصلية
-    for part, originalColor in pairs(originalColors) do
-        if part and part.Parent then
-            part.BrickColor = originalColor
-            part.Material = Enum.Material.Plastic -- إرجاع المادة الأصلية
-        end
-    end
-    
-    -- ⭐ إرجاع سرعة المشي
-    humanoid.WalkSpeed = originalWalkSpeed
-    
-    -- ⭐ إزالة التوهج
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") then
-            local glow = part:FindFirstChild("BuddhaGlow")
-            if glow then
-                glow:Destroy()
-            end
-            local partGlow = part:FindFirstChild("PartGlow")
-            if partGlow then
-                partGlow:Destroy()
-            end
-        end
-    end
-    
-    -- تنظيف
-    originalColors = {}
-end
-
--- 🎯 تبديل الوضع
-local function toggleGiantMode()
-    if isBigSize then
-        deactivateGiantMode()
-    else
-        activateGiantYellowMode()
-    end
-end
-
--- 🎮 أحداث الأداة
-tool.Activated:Connect(function()
-    toggleGiantMode()
-end)
-
-tool.Equipped:Connect(function()
-    print("🟡 Buddha tool equipped - Click to become giant yellow")
-end)
-
-tool.Unequipped:Connect(function()
-    -- العودة تلقائياً عند ترك الأداة
-    if isBigSize then
-        deactivateGiantMode()
-    end
-end)
-
--- 🔄 تحديث الشخصية عند الموت
-player.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    humanoid = character:WaitForChild("Humanoid")
-    
-    -- إعادة تعيين المتغيرات
-    isBigSize = false
-    originalColors = {}
-end)
-
--- 🚀 إضافة الأداة للاعب
-tool.Parent = Players.LocalPlayer.Backpack
-
--- 🔧 زر طوارئ للعودة
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+-- Tool ID for the dragon item
+local TOOL_ID = 11337465542
+
+-- GUI Creation
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "DragonMenu"
+screenGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 350, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -150)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+-- Corner for rounded edges
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = mainFrame
+
+-- Stroke for border
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(100, 200, 255)
+stroke.Thickness = 2
+stroke.Parent = mainFrame
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Text = "DRAGON ABILITIES"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 8)
+titleCorner.Parent = title
+
+-- Close button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Text = "X"
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextSize = 14
+closeButton.Parent = title
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 15)
+closeCorner.Parent = closeButton
+
+-- Ability list container
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(1, -20, 1, -60)
+scrollFrame.Position = UDim2.new(0, 10, 0, 50)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.BorderSizePixel = 0
+scrollFrame.ScrollBarThickness = 4
+scrollFrame.Parent = mainFrame
+
+-- Ability templates
+local abilities = {
+    {
+        name = "Heatwave",
+        key = "Z",
+        mass = "Mas. 150",
+        status = "Available"
+    },
+    {
+        name = "Cannon",
+        key = "Z",
+        mass = "Mas. 150", 
+        status = "Available"
+    },
+    {
+        name = "Infernal Pincer",
+        key = "X",
+        mass = "Mas. 250",
+        status = "Available"
+    },
+    {
+        name = "Scorching Downfall",
+        key = "C",
+        mass = "Mas. 250",
+        status = "Available"
+    },
+    {
+        name = "Imperial Evolution",
+        key = "V",
+        mass = "Mas. 350",
+        status = "Available"
+    },
+    {
+        name = "Draconic Soar",
+        key = "F",
+        mass = "Mas. 75",
+        status = "Available"
+    }
+}
+
+-- Create ability items
+local function createAbilityItem(ability, index)
+    local yPosition = (index - 1) * 50
+    
+    local abilityFrame = Instance.new("Frame")
+    abilityFrame.Size = UDim2.new(1, 0, 0, 45)
+    abilityFrame.Position = UDim2.new(0, 0, 0, yPosition)
+    abilityFrame.BackgroundTransparency = 1
+    abilityFrame.Parent = scrollFrame
+    
+    -- Background for ability
+    local bg = Instance.new("Frame")
+    bg.Size = UDim2.new(1, 0, 1, 0)
+    bg.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    bg.BorderSizePixel = 0
+    bg.Parent = abilityFrame
+    
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(0, 6)
+    bgCorner.Parent = bg
+    
+    -- Ability name
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(0.5, -5, 0.5, -2)
+    nameLabel.Position = UDim2.new(0, 10, 0, 5)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameLabel.Text = ability.name
+    nameLabel.Font = Enum.Font.Gotham
+    nameLabel.TextSize = 14
+    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    nameLabel.Parent = abilityFrame
+    
+    -- Mass requirement
+    local massLabel = Instance.new("TextLabel")
+    massLabel.Size = UDim2.new(0.3, -5, 0.5, -2)
+    massLabel.Position = UDim2.new(0.5, 5, 0, 5)
+    massLabel.BackgroundTransparency = 1
+    massLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    massLabel.Text = ability.mass
+    massLabel.Font = Enum.Font.Gotham
+    massLabel.TextSize = 12
+    massLabel.TextXAlignment = Enum.TextXAlignment.Left
+    massLabel.Parent = abilityFrame
+    
+    -- Key bind
+    local keyFrame = Instance.new("Frame")
+    keyFrame.Size = UDim2.new(0, 30, 0, 20)
+    keyFrame.Position = UDim2.new(1, -40, 0, 12)
+    keyFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+    keyFrame.Parent = abilityFrame
+    
+    local keyCorner = Instance.new("UICorner")
+    keyCorner.CornerRadius = UDim.new(0, 4)
+    keyCorner.Parent = keyFrame
+    
+    local keyLabel = Instance.new("TextLabel")
+    keyLabel.Size = UDim2.new(1, 0, 1, 0)
+    keyLabel.BackgroundTransparency = 1
+    keyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    keyLabel.Text = "["..ability.key.."]"
+    keyLabel.Font = Enum.Font.GothamBold
+    keyLabel.TextSize = 12
+    keyLabel.Parent = keyFrame
+    
+    -- Separator line
+    if index < #abilities then
+        local separator = Instance.new("Frame")
+        separator.Size = UDim2.new(1, -20, 0, 1)
+        separator.Position = UDim2.new(0, 10, 1, -1)
+        separator.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+        separator.BorderSizePixel = 0
+        separator.Parent = abilityFrame
+    end
+end
+
+-- Create all ability items
+for i, ability in ipairs(abilities) do
+    createAbilityItem(ability, i)
+end
+
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, #abilities * 50)
+
+-- Mobile button
+local mobileButton = Instance.new("TextButton")
+mobileButton.Size = UDim2.new(0, 60, 0, 60)
+mobileButton.Position = UDim2.new(1, -70, 1, -70)
+mobileButton.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+mobileButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+mobileButton.Text = "🐉"
+mobileButton.Font = Enum.Font.GothamBold
+mobileButton.TextSize = 20
+mobileButton.Visible = false
+mobileButton.Parent = screenGui
+
+local mobileCorner = Instance.new("UICorner")
+mobileCorner.CornerRadius = UDim.new(0, 30)
+mobileCorner.Parent = mobileButton
+
+-- Tool variables
+local player = nil
+local humanoid = nil
+local character = nil
+local dragonModel = nil
+local isRiding = false
+
+-- Tool equipped event
+tool.Equipped:Connect(function()
+    player = Players.LocalPlayer
+    character = player.Character
+    humanoid = character:FindFirstChildOfClass("Humanoid")
+    
+    -- Add GUI to player's GUI
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+    
+    -- Show mobile button on mobile devices
+    if UserInputService.TouchEnabled then
+        mobileButton.Visible = true
+    end
+end)
+
+-- Tool unequipped event
+tool.Unequipped:Connect(function()
+    if screenGui then
+        screenGui:Destroy()
+    end
+    isRiding = false
+    stopRidingDragon()
+end)
+
+-- Toggle menu function
+local function toggleMenu()
+    mainFrame.Visible = not mainFrame.Visible
+end
+
+-- Close button event
+closeButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+end)
+
+-- Mobile button event
+mobileButton.MouseButton1Click:Connect(function()
+    toggleMenu()
+end)
+
+-- Key input handling
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
-    -- زر R للعودة الطارئة
-    if input.KeyCode == Enum.KeyCode.R and isBigSize then
-        deactivateGiantMode()
+    if input.KeyCode == Enum.KeyCode.Z then
+        -- Heatwave/Cannon ability
+        print("Heatwave/Cannon ability activated!")
+        
+    elseif input.KeyCode == Enum.KeyCode.X then
+        -- Infernal Pincer ability
+        print("Infernal Pincer ability activated!")
+        
+    elseif input.KeyCode == Enum.KeyCode.C then
+        -- Scorching Downfall ability  
+        print("Scorching Downfall ability activated!")
+        
+    elseif input.KeyCode == Enum.KeyCode.V then
+        -- Imperial Evolution ability
+        print("Imperial Evolution ability activated!")
+        startRidingDragon()
+        
+    elseif input.KeyCode == Enum.KeyCode.F then
+        -- Draconic Soar ability
+        print("Draconic Soar ability activated!")
+        
     end
 end)
 
-print("🟡 Buddha Giant Yellow tool loaded successfully!")
-print("🎮 Click the tool to become giant yellow")
-print("🔴 Press R to emergency return to normal")
+-- Dragon riding functions
+local function createDragon()
+    -- Create a simple dragon model (greenish black color)
+    local dragon = Instance.new("Model")
+    dragon.Name = "DragonMount"
+    
+    local rootPart = Instance.new("Part")
+    rootPart.Name = "RootPart"
+    rootPart.Size = Vector3.new(4, 2, 8)
+    rootPart.BrickColor = BrickColor.new("Really black")
+    rootPart.Material = Enum.Material.Neon
+    rootPart.Anchored = false
+    rootPart.CanCollide = true
+    rootPart.Parent = dragon
+    
+    -- Dragon head
+    local head = Instance.new("Part")
+    head.Name = "Head"
+    head.Size = Vector3.new(3, 2, 3)
+    head.BrickColor = BrickColor.new("Dark green")
+    head.Material = Enum.Material.Neon
+    head.Anchored = false
+    head.CanCollide = true
+    head.Parent = dragon
+    
+    local headWeld = Instance.new("Weld")
+    headWeld.Part0 = rootPart
+    headWeld.Part1 = head
+    headWeld.C0 = CFrame.new(0, 1, -4)
+    headWeld.Parent = head
+    
+    -- Dragon tail (big tail as requested)
+    local tail = Instance.new("Part")
+    tail.Name = "Tail"
+    tail.Size = Vector3.new(2, 1, 6)
+    tail.BrickColor = BrickColor.new("Dark green")
+    tail.Material = Enum.Material.Neon
+    tail.Anchored = false
+    tail.CanCollide = true
+    tail.Parent = dragon
+    
+    local tailWeld = Instance.new("Weld")
+    tailWeld.Part0 = rootPart
+    tailWeld.Part1 = tail
+    tailWeld.C0 = CFrame.new(0, 0, 5)
+    tailWeld.Parent = tail
+    
+    -- Seat for player
+    local seat = Instance.new("Seat")
+    seat.Name = "DragonSeat"
+    seat.Size = Vector3.new(2, 1, 2)
+    seat.BrickColor = BrickColor.new("Bright red")
+    seat.Parent = dragon
+    
+    local seatWeld = Instance.new("Weld")
+    seatWeld.Part0 = rootPart
+    seatWeld.Part1 = seat
+    seatWeld.C0 = CFrame.new(0, 2, -2)
+    seatWeld.Parent = seat
+    
+    -- Humanoid for dragon
+    local dragonHumanoid = Instance.new("Humanoid")
+    dragonHumanoid.Name = "DragonHumanoid"
+    dragonHumanoid.WalkSpeed = 16
+    dragonHumanoid.Parent = dragon
+    
+    return dragon
+end
+
+local function startRidingDragon()
+    if isRiding then return end
+    
+    isRiding = true
+    
+    -- Create dragon model
+    dragonModel = createDragon()
+    dragonModel.PrimaryPart = dragonModel:FindFirstChild("RootPart")
+    
+    -- Position dragon in front of player
+    local character = player.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            dragonModel:SetPrimaryPartCFrame(
+                humanoidRootPart.CFrame * CFrame.new(0, 0, -8)
+            )
+        end
+    end
+    
+    dragonModel.Parent = workspace
+    
+    -- Sit player on dragon
+    local seat = dragonModel:FindFirstChild("DragonSeat")
+    if seat and character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Sit = true
+            wait(0.1)
+            character:SetPrimaryPartCFrame(seat.CFrame * CFrame.new(0, 2, 0))
+        end
+    end
+end
+
+local function stopRidingDragon()
+    if not isRiding then return end
+    
+    isRiding = false
+    
+    if dragonModel then
+        dragonModel:Destroy()
+        dragonModel = nil
+    end
+    
+    -- Make player stand up
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Sit = false
+        end
+    end
+end
+
+-- Cleanup when tool is unequipped
+tool.Unequipped:Connect(function()
+    if screenGui then
+        screenGui:Destroy()
+    end
+    stopRidingDragon()
+end)
